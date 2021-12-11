@@ -15,6 +15,11 @@ expression :
     | expression MOD expression 
     | expression ADD expression 
     | expression SUB expression 
+    | expression BITOR expression
+    | expression BITAND expression
+    | expression XOR expression
+    | expression OR expression
+    | expression AND expression
     | expression LSHIFT expression
     | expression RSHIFT expression
     | expression LT expression
@@ -23,7 +28,7 @@ expression :
     | expression GEQ expression
     | expression EQ expression
     | expression NOT_EQ expression
-    | Literals | Identifier;
+    | functionCall | Literals | Identifier;
 
 
 statement : 
@@ -36,7 +41,7 @@ statement :
     | breakStatement
     | continueStatement
     | block
-    | functionCall
+    | declaration
     | expression? SEMI;
 block : 
     LBRACE (statement)* RBRACE;
@@ -65,7 +70,19 @@ breakStatement : BREAK SEMI;
 continueStatement : CONTINUE SEMI;
 
 
-declaration : typeSpecifier Identifier SEMI;
+declaration : 
+    variableDeclaration
+    | functionDeclaration
+    ;
+
+variableDeclaration : 
+    typeSpecifier Identifier SEMI;
+
+functionDeclaration : 
+    typeSpecifier Identifier LPAREN (functionParameter (COMMA functionParameter)*)? RPAREN block;
+
+functionParameter :
+    typeSpecifier Identifier;
 
 typeSpecifier : 
     integerTypeSpecifier

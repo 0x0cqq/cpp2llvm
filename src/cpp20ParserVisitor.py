@@ -14,6 +14,46 @@ class cpp20ParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by cpp20Parser#baseSpecifierList.
+    def visitBaseSpecifierList(self, ctx:cpp20Parser.BaseSpecifierListContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by cpp20Parser#accessSpecifier.
+    def visitAccessSpecifier(self, ctx:cpp20Parser.AccessSpecifierContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by cpp20Parser#accessLabel.
+    def visitAccessLabel(self, ctx:cpp20Parser.AccessLabelContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by cpp20Parser#memberDeclaration.
+    def visitMemberDeclaration(self, ctx:cpp20Parser.MemberDeclarationContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by cpp20Parser#constructorDeclaration.
+    def visitConstructorDeclaration(self, ctx:cpp20Parser.ConstructorDeclarationContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by cpp20Parser#destructorDeclaration.
+    def visitDestructorDeclaration(self, ctx:cpp20Parser.DestructorDeclarationContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by cpp20Parser#memberSpecification.
+    def visitMemberSpecification(self, ctx:cpp20Parser.MemberSpecificationContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by cpp20Parser#classDefinition.
+    def visitClassDefinition(self, ctx:cpp20Parser.ClassDefinitionContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by cpp20Parser#constExpression.
     def visitConstExpression(self, ctx:cpp20Parser.ConstExpressionContext):
         return self.visitChildren(ctx)
@@ -86,6 +126,11 @@ class cpp20ParserVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by cpp20Parser#declaration.
     def visitDeclaration(self, ctx:cpp20Parser.DeclarationContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by cpp20Parser#arrayDeclarator.
+    def visitArrayDeclarator(self, ctx:cpp20Parser.ArrayDeclaratorContext):
         return self.visitChildren(ctx)
 
 

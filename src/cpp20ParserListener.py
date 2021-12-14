@@ -17,6 +17,78 @@ class cpp20ParserListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by cpp20Parser#baseSpecifierList.
+    def enterBaseSpecifierList(self, ctx:cpp20Parser.BaseSpecifierListContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#baseSpecifierList.
+    def exitBaseSpecifierList(self, ctx:cpp20Parser.BaseSpecifierListContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#accessSpecifier.
+    def enterAccessSpecifier(self, ctx:cpp20Parser.AccessSpecifierContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#accessSpecifier.
+    def exitAccessSpecifier(self, ctx:cpp20Parser.AccessSpecifierContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#accessLabel.
+    def enterAccessLabel(self, ctx:cpp20Parser.AccessLabelContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#accessLabel.
+    def exitAccessLabel(self, ctx:cpp20Parser.AccessLabelContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#memberDeclaration.
+    def enterMemberDeclaration(self, ctx:cpp20Parser.MemberDeclarationContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#memberDeclaration.
+    def exitMemberDeclaration(self, ctx:cpp20Parser.MemberDeclarationContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#constructorDeclaration.
+    def enterConstructorDeclaration(self, ctx:cpp20Parser.ConstructorDeclarationContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#constructorDeclaration.
+    def exitConstructorDeclaration(self, ctx:cpp20Parser.ConstructorDeclarationContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#destructorDeclaration.
+    def enterDestructorDeclaration(self, ctx:cpp20Parser.DestructorDeclarationContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#destructorDeclaration.
+    def exitDestructorDeclaration(self, ctx:cpp20Parser.DestructorDeclarationContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#memberSpecification.
+    def enterMemberSpecification(self, ctx:cpp20Parser.MemberSpecificationContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#memberSpecification.
+    def exitMemberSpecification(self, ctx:cpp20Parser.MemberSpecificationContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#classDefinition.
+    def enterClassDefinition(self, ctx:cpp20Parser.ClassDefinitionContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#classDefinition.
+    def exitClassDefinition(self, ctx:cpp20Parser.ClassDefinitionContext):
+        pass
+
+
     # Enter a parse tree produced by cpp20Parser#constExpression.
     def enterConstExpression(self, ctx:cpp20Parser.ConstExpressionContext):
         pass
@@ -149,6 +221,15 @@ class cpp20ParserListener(ParseTreeListener):
 
     # Exit a parse tree produced by cpp20Parser#declaration.
     def exitDeclaration(self, ctx:cpp20Parser.DeclarationContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#arrayDeclarator.
+    def enterArrayDeclarator(self, ctx:cpp20Parser.ArrayDeclaratorContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#arrayDeclarator.
+    def exitArrayDeclarator(self, ctx:cpp20Parser.ArrayDeclaratorContext):
         pass
 
 

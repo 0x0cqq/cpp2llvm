@@ -1,3 +1,22 @@
+class classA{
+
+};
+
+class MyClass : public classA {
+    public:
+        MyClass() {
+            // ...
+        }
+        ~MyClass() {
+            // ...
+        }
+        void method() {
+            int a[10];
+            a[1] = 2;
+        }
+    private:
+        int a, b, c = 1;
+};
 
 int f(int n){
     if(n == 1 || n == 2) return 1;

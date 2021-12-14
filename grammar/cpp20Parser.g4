@@ -4,7 +4,23 @@ options {
     tokenVocab = cpp20Lexer;
 }
 
-translationUnit : statement*;
+translationUnit : declaration*;
+
+baseSpecifierList: (accessSpecifier? Identifier) (COMMA accessSpecifier? Identifier)*;
+
+accessSpecifier : PUBLIC | PROTECTED | PRIVATE;
+
+accessLabel : accessSpecifier COLON;
+
+memberDeclaration : functionDeclaration | variableDeclaration;
+
+constructorDeclaration :  Identifier LPAREN (functionParameter (COMMA functionParameter)*)? RPAREN  (COLON functionCall)? block;
+
+destructorDeclaration :  COMPL Identifier LPAREN RPAREN block;
+
+memberSpecification : (accessLabel | memberDeclaration | constructorDeclaration | destructorDeclaration)*;
+
+classDefinition: (CLASS | STRUCT) Identifier (COLON baseSpecifierList)? LBRACE memberSpecification RBRACE SEMI;
 
 constExpression : Literals;
 
@@ -28,7 +44,10 @@ expression :
     | expression GEQ expression
     | expression EQ expression
     | expression NOT_EQ expression
+    | expression LSQUARE expression RSQUARE
     | functionCall | Literals | Identifier;
+
+// statement 
 
 
 statement : 
@@ -41,13 +60,12 @@ statement :
     | breakStatement
     | continueStatement
     | block
-    | declaration
+    | variableDeclaration
+    | arrayDeclarator
     | expression? SEMI;
+
 block : 
     LBRACE (statement)* RBRACE;
-
-
-
 
 functionCall : Identifier LPAREN (expression (COMMA expression)*)? RPAREN;
 
@@ -70,13 +88,19 @@ breakStatement : BREAK SEMI;
 continueStatement : CONTINUE SEMI;
 
 
+// Declaration
+
 declaration : 
-    variableDeclaration
-    | functionDeclaration
-    ;
+    arrayDeclarator
+    | variableDeclaration
+    | functionDeclaration    
+    | classDefinition;
+
+arrayDeclarator : 
+    typeSpecifier Identifier LSQUARE expression RSQUARE (ASSIGN LBRACE expression (COMMA expression)* LBRACE)?;
 
 variableDeclaration : 
-    typeSpecifier Identifier SEMI;
+    typeSpecifier Identifier (ASSIGN expression)? (COMMA Identifier (ASSIGN expression)?)* SEMI;
 
 functionDeclaration : 
     typeSpecifier Identifier LPAREN (functionParameter (COMMA functionParameter)*)? RPAREN block;

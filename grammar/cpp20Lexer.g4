@@ -255,6 +255,8 @@ XOR_EQ: '^=' | 'xor_eq';
 
 // 
 
+// identifier
+
 
 
 fragment DIGIT: '0' ..'9';
@@ -276,67 +278,41 @@ LINE_COMMENT:
 
 COMMENT: '/*' .*? '*/' -> channel(HIDDEN);
 
-// Identifier
+
+IntegerSuffix: UnsignedSuffix? (LongLongSuffix | LongSuffix );
 
 Identifier: NONDIGIT (DIGIT | NONDIGIT)*;
 
-// Integer literals
+// General Literals
+fragment UnsignedSuffix: 'u' | 'U';
 
-Literals:
-	IntegerLiteral
-	| FloatingLiteral
-	| CharacterLiteral
-	| StringLiteral;
+fragment LongSuffix: 'l' | 'L';
 
-IntegerLiteral:
-	(DecimalLiteral IntegerSuffix?)
-	| (HexadecimalLiteral IntegerSuffix?)
-	| (OctalLiteral IntegerSuffix?)
-	| (BinaryLiteral IntegerSuffix?);
+fragment LongLongSuffix: 'll' | 'LL';
 
 DecimalLiteral: '0' | (('1' ..'9') ('0' ..'9')*);
 
-OctalLiteral: ('0') ('0' ..'7')+;
+FloatingLiteral:
+	 (DigitSequence DecimalExponent )
+	| (DigitSequence DOT DecimalExponent)
+    | (DigitSequence DOT DigitSequence DecimalExponent?);
 
-HexadecimalLiteral:
-	('0') ('x' | 'X') ('0' ..'9' | 'a' ..'f' | 'A' ..'F')+;
 
-BinaryLiteral: ('0') ('b' | 'B') ('0' ..'1')+;
-
-IntegerSuffix: UnsignedSuffix? (LongSuffix | LongLongSuffix);
-
-UnsignedSuffix: 'u' | 'U';
-
-LongSuffix: 'l' | 'L';
-
-LongLongSuffix: 'll' | 'LL';
 
 // Floating literals
 
 DigitSequence: ('0' ..'9')+;
 
-HexDigitSequence: ('0' ..'9' | 'A' ..'F' | 'a' ..'f')+;
-
-FloatingLiteral:
-	(DigitSequence DecimalExponent FloatSuffix?)
-	| (DigitSequence DOT DecimalExponent FloatSuffix?)
-	| (DigitSequence? DOT DigitSequence DecimalExponent? FloatSuffix?)
-	| ('0' ('x' | 'X') HexDigitSequence HexExponent FloatSuffix?)
-	| ('0' ('x' | 'X') HexDigitSequence DOT HexExponent FloatSuffix?)
-	| ('0' ('x' | 'X') HexDigitSequence? DOT HexDigitSequence HexExponent FloatSuffix?);
 
 DecimalExponent: ('e' | 'E') (ADD | SUB)? DigitSequence;
-
-HexExponent: ('p' | 'P') (ADD | SUB)? DigitSequence;
-
-FloatSuffix: ('f' | 'F') | ('l' | 'L');
 
 // TBD: Optional single quotes (') can be inserted between the digits as a separator, they are
 // ignored when compiling.
 
 // Character literals
 
-CharacterLiteral: ('u8' | 'u' | 'U' | 'L')? SQUOTE CChar SQUOTE;
+
+CharTypeSpecificaton: ('u8' | 'u' | 'U' | 'L');
 
 CChar: ~ ['\\\r\n] | Escapesequence | Universalcharactername;
 
@@ -371,8 +347,7 @@ Universalcharactername: '\\u' HEXQUAD | '\\U' HEXQUAD HEXQUAD;
 
 // Strings Literals
 
-StringLiteral: ('L' | 'u8' | 'u' | 'U')? DQUOTE SChar* DQUOTE;
-
 SChar: ~ ["\\\r\n] | Escapesequence | Universalcharactername;
 
 // RawString is not supported User defined literals are not supported
+

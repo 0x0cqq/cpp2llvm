@@ -9,6 +9,31 @@ else:
 
 class cpp20ParserVisitor(ParseTreeVisitor):
 
+    # Visit a parse tree produced by cpp20Parser#literals.
+    def visitLiterals(self, ctx:cpp20Parser.LiteralsContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by cpp20Parser#floatingLiteral.
+    def visitFloatingLiteral(self, ctx:cpp20Parser.FloatingLiteralContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by cpp20Parser#integerLiteral.
+    def visitIntegerLiteral(self, ctx:cpp20Parser.IntegerLiteralContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by cpp20Parser#characterLiteral.
+    def visitCharacterLiteral(self, ctx:cpp20Parser.CharacterLiteralContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by cpp20Parser#stringLiteral.
+    def visitStringLiteral(self, ctx:cpp20Parser.StringLiteralContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by cpp20Parser#translationUnit.
     def visitTranslationUnit(self, ctx:cpp20Parser.TranslationUnitContext):
         return self.visitChildren(ctx)
@@ -56,6 +81,11 @@ class cpp20ParserVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by cpp20Parser#constExpression.
     def visitConstExpression(self, ctx:cpp20Parser.ConstExpressionContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by cpp20Parser#leftExpression.
+    def visitLeftExpression(self, ctx:cpp20Parser.LeftExpressionContext):
         return self.visitChildren(ctx)
 
 

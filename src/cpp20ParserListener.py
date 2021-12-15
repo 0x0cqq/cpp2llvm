@@ -8,6 +8,51 @@ else:
 # This class defines a complete listener for a parse tree produced by cpp20Parser.
 class cpp20ParserListener(ParseTreeListener):
 
+    # Enter a parse tree produced by cpp20Parser#literals.
+    def enterLiterals(self, ctx:cpp20Parser.LiteralsContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#literals.
+    def exitLiterals(self, ctx:cpp20Parser.LiteralsContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#floatingLiteral.
+    def enterFloatingLiteral(self, ctx:cpp20Parser.FloatingLiteralContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#floatingLiteral.
+    def exitFloatingLiteral(self, ctx:cpp20Parser.FloatingLiteralContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#integerLiteral.
+    def enterIntegerLiteral(self, ctx:cpp20Parser.IntegerLiteralContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#integerLiteral.
+    def exitIntegerLiteral(self, ctx:cpp20Parser.IntegerLiteralContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#characterLiteral.
+    def enterCharacterLiteral(self, ctx:cpp20Parser.CharacterLiteralContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#characterLiteral.
+    def exitCharacterLiteral(self, ctx:cpp20Parser.CharacterLiteralContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#stringLiteral.
+    def enterStringLiteral(self, ctx:cpp20Parser.StringLiteralContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#stringLiteral.
+    def exitStringLiteral(self, ctx:cpp20Parser.StringLiteralContext):
+        pass
+
+
     # Enter a parse tree produced by cpp20Parser#translationUnit.
     def enterTranslationUnit(self, ctx:cpp20Parser.TranslationUnitContext):
         pass
@@ -95,6 +140,15 @@ class cpp20ParserListener(ParseTreeListener):
 
     # Exit a parse tree produced by cpp20Parser#constExpression.
     def exitConstExpression(self, ctx:cpp20Parser.ConstExpressionContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#leftExpression.
+    def enterLeftExpression(self, ctx:cpp20Parser.LeftExpressionContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#leftExpression.
+    def exitLeftExpression(self, ctx:cpp20Parser.LeftExpressionContext):
         pass
 
 

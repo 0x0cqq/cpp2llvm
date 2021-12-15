@@ -11,23 +11,24 @@ class MyClass : public classA {
             // ...
         }
         void method() {
-            int a[10];
+            int a[10uLL];
             a[1] = 2;
+
         }
     private:
         int a, b, c = 1;
 };
 
-int f(int n){
-    if(n == 1 || n == 2) return 1;
+int u(int n){
+    if(n == 123ll || n == 2.123123) return 1;
     else {
-        return f(n-1) + f(n-2);
+        return u(n-1) + u(n-2);
     }
 }
 
 int main(){
     int a;
     int b;
-    f(10);
+    u(10);
     return 0;
 }

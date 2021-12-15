@@ -4,6 +4,28 @@ options {
     tokenVocab = cpp20Lexer;
 }
 
+
+
+// Integer literals
+
+literals:
+	floatingLiteral
+	| integerLiteral
+	| characterLiteral
+	| stringLiteral;
+
+
+floatingLiteral: FloatingLiteral;
+
+integerLiteral: DecimalLiteral IntegerSuffix?;
+
+characterLiteral: CharTypeSpecificaton? SQUOTE CChar SQUOTE;
+
+stringLiteral: CharTypeSpecificaton? DQUOTE SChar* DQUOTE;
+
+
+// translatin
+
 translationUnit : declaration*;
 
 baseSpecifierList: (accessSpecifier? Identifier) (COMMA accessSpecifier? Identifier)*;
@@ -22,10 +44,17 @@ memberSpecification : (accessLabel | memberDeclaration | constructorDeclaration 
 
 classDefinition: (CLASS | STRUCT) Identifier (COLON baseSpecifierList)? LBRACE memberSpecification RBRACE SEMI;
 
-constExpression : Literals;
+constExpression : literals;
+
+leftExpression :
+    Identifier
+    | Identifier (LSQUARE expression RSQUARE) ;
 
 expression :
-    expression ASSIGN expression
+    functionCall 
+    | literals 
+    | Identifier
+    | leftExpression ASSIGN expression
     | expression MULT expression 
     | expression DIV expression 
     | expression MOD expression 
@@ -44,9 +73,7 @@ expression :
     | expression GEQ expression
     | expression EQ expression
     | expression NOT_EQ expression
-    | expression LSQUARE expression RSQUARE
-    | functionCall | Literals | Identifier;
-
+    | expression LSQUARE expression RSQUARE;
 // statement 
 
 

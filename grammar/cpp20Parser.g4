@@ -54,6 +54,8 @@ expression :
     functionCall 
     | literals 
     | Identifier
+    | LPAREN expression RPAREN
+    | NOT expression
     | leftExpression ASSIGN expression
     | expression MULT expression 
     | expression DIV expression 

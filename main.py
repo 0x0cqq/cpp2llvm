@@ -26,7 +26,10 @@ class myCpp20Visitor(cpp20Visitor):
         # 待生成的llvm语句块
         # 每生成一块语句时，将当前语句块加到末尾，以self.Builder[-1]调用
         self.Builders=[]
- 
+        
+        #符号表
+        self.symbolTable = NameTable()
+        
     def visitFunctionDeclaration(self, ctx: cpp20Parser.FunctionDeclarationContext):
         print(f"visitFunctionDeclaration: {ctx.Identifier().getText()}",) #test for debug
         '''
@@ -172,20 +175,24 @@ class myCpp20Visitor(cpp20Visitor):
     def visitExpression(self, ctx: cpp20Parser.ExpressionContext):
         ChildCount=ctx.getChildCount()
         Builder = self.Builders[-1]
-        if(ChildCount==0):
-          '''
-          对应语法：expression: Identifier
-          '''
-          #TODO:在符号表中检索当前作用域是否有该字符
-          #完成符号表后再进行编写
-          #返回该字符对应的（虚寄存器）？
-
-        elif(ChildCount == 1):
-          '''
-          对应语法：expression: Literals;
-          '''
-          result = self.visit(ctx.getChild(0))
-          return result
+        if(ChildCount == 1):
+          grandChildren = ctx.getChild(0).getChildCount()
+          if(grandChildren):
+              '''
+              对应语法：expression: Literals|functionCall;
+              '''
+              result = self.visit(ctx.getChild(0))
+              return result
+          else:
+              '''
+              对应语法：expression: Identifier
+              '''
+              symbol = self.symbolTable.getProperty(ctx.getText())
+              return{
+                'type':symbol.get_type(),
+                'signed':symbol.get_signed(),
+                'value':symbol.get_value()
+              }
 
         elif(ChildCount == 2):
           '''
@@ -269,6 +276,7 @@ class myCpp20Visitor(cpp20Visitor):
             对应语法： expression: leftExpression '=' expression
             '''
 
+
           elif(Operation == '|' or Operation == 'bitor' or Operation == '&' or Operation == 'bitand' or Operation == '^' or Operation == 'xor'):
             '''
             对应语法： expression: expression BITOR|BITAND|XOR expression
@@ -344,6 +352,17 @@ class myCpp20Visitor(cpp20Visitor):
             'type':double,
             'value':ir.Constant(double,float(ctx.getText()))
         }
+    
+    def visitLeftExpression(self, ctx: cpp20Parser.LeftExpressionContext):
+        if(ctx.getText()[-1]==']'):
+            '''
+            对应语法：leftExpression:Identifier (LSQUARE expression RSQUARE)
+            '''
+            #TODO:需要先写好数组的索引方式才能调用
+        else:
+            '''
+            对应语法：leftExpression:Identifier
+            '''
 
 if __name__ == "__main__":
     input_stream = FileStream("test2.cpp")

@@ -1,5 +1,5 @@
 int main(){
-    int a = 2*(5+2);
-    2>>3;
+    int a;
+    a = 1+2;
     return 0;
 }

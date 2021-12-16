@@ -56,7 +56,6 @@ expression :
     | Identifier
     | LPAREN expression RPAREN
     | NOT expression
-    | leftExpression ASSIGN expression
     | expression MULT expression 
     | expression DIV expression 
     | expression MOD expression 
@@ -75,7 +74,8 @@ expression :
     | expression GEQ expression
     | expression EQ expression
     | expression NOT_EQ expression
-    | expression LSQUARE expression RSQUARE;
+    | expression LSQUARE expression RSQUARE
+    | leftExpression ASSIGN expression;
 // statement 
 
 

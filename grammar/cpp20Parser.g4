@@ -24,7 +24,7 @@ characterLiteral: CharTypeSpecificaton? SQUOTE CChar SQUOTE;
 stringLiteral: CharTypeSpecificaton? DQUOTE SChar* DQUOTE;
 
 
-// translatin
+// translation
 
 translationUnit : declaration*;
 
@@ -48,7 +48,7 @@ constExpression : literals;
 
 leftExpression :
     Identifier
-    | Identifier (LSQUARE expression RSQUARE) ;
+    | Identifier (LSQUARE DecimalLiteral RSQUARE) ;
 
 expression :
     functionCall 
@@ -74,7 +74,7 @@ expression :
     | expression GEQ expression
     | expression EQ expression
     | expression NOT_EQ expression
-    | expression LSQUARE expression RSQUARE
+    | Identifier LSQUARE DecimalLiteral RSQUARE
     | leftExpression ASSIGN expression;
 // statement 
 
@@ -126,7 +126,7 @@ declaration :
     | classDefinition;
 
 arrayDeclarator : 
-    typeSpecifier Identifier LSQUARE expression RSQUARE (ASSIGN LBRACE expression (COMMA expression)* LBRACE)?;
+    typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN LBRACE expression (COMMA expression)* RBRACE)?;
 
 variableDeclaration: Identifier  #varDeclWithoutInit
     | Identifier ASSIGN expression #varDeclWithInit

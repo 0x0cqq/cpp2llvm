@@ -26,9 +26,8 @@ class myCpp20Visitor(cpp20Visitor):
         # 待生成的llvm语句块
         # 每生成一块语句时，将当前语句块加到末尾，以self.Builder[-1]调用
         self.Builders=[]
-
+        # 符号表
         self.symbolTable = NameTable()
- 
 
     def getTypeFromText(name : str) :
         if(name == "int"):
@@ -78,9 +77,34 @@ class myCpp20Visitor(cpp20Visitor):
 
         del self.type
         return
-        
+    
     def visitArrayDeclarator(self, ctx: cpp20Parser.ArrayDeclaratorContext):
-        return super().visitArrayDeclarator(ctx)
+        '''
+        对应语法：typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN LBRACE expression (COMMA expression)* RBRACE)?;
+        '''
+        #数组长度
+        ArrayLength = int(ctx.getChild(3).getText())
+        print("arraylength: ",ArrayLength)
+        #数据类型
+        ArrayType = self.visit(ctx.getChild(0))
+        LLVMArrayType = ir.ArrayType(ArrayType,ArrayLength)
+        #数据标识符
+        ArrayName = ctx.getChild(1).getText()
+        #变量的声明
+        if(self.symbolTable.current_scope_level == 0):
+            NewVar=ir.GlobalVariable(self.Module,LLVMArrayType,name = ArrayName)
+        else:
+            Builder=self.Builders[-1]
+            NewVar=Builder.alloca(LLVMArrayType,name = ArrayName)
+
+        symbolProperty = NameProperty(LLVMArrayType,NewVar)
+        self.symbolTable.addLocal(ArrayName,symbolProperty)
+        ChildCount=ctx.getChildCount()
+        if ChildCount > 5:
+            #赋初值给数组中的元素
+            ''''''
+        return 
+
     def visitFunctionDeclaration(self, ctx: cpp20Parser.FunctionDeclarationContext):
         print(f"visitFunctionDeclaration: {ctx.Identifier().getText()}",) #test for debug
         '''
@@ -98,9 +122,14 @@ class myCpp20Visitor(cpp20Visitor):
         Block = LLVMFunc.append_basic_block(name="__"+FunctionName)
         Builder= ir.IRBuilder(Block)
         self.Builders.append(Builder)
+        #进入作用域
+        self.symbolTable.enterScope()
         #访问函数块，返回值到ValueToReturn
         ChildCount = ctx.getChildCount()
         ValueToReturn=self.visit(ctx.getChild(ChildCount-1))
+        #退出作用域
+        self.symbolTable.exitScope()
+
         return {
             'type': ReturnType,
             'signed':True,
@@ -281,10 +310,23 @@ class myCpp20Visitor(cpp20Visitor):
           
         elif(ChildCount > 3):
             '''
-            对应语法：expression: expression '[' expression ']'
+            对应语法：expression: Identifier '[' DecimalLiteral ']'
             '''
-            #TODO：读数组？这个不太明白
-            print("array index")
+            index = self.symbolTable.getProperty(ctx.getChild(0).getText())
+            subscribe = int(ctx.getChild(2).getText())
+            if(isinstance(index.get_type(),ir.types.ArrayType)):
+                Builder = self.Builders[-1]
+                Address = Builder.gep(index.get_value(),[ir.Constant(int32,0),ir.Constant(int32,subscribe)],inbounds=True)
+                ValueToReturn = Builder.load(Address)
+                print("call arrayItem",ValueToReturn)
+                return{
+                    'type':index.get_type().element,
+                    'signed':True,
+                    'value':ValueToReturn,
+                    'address':Address
+                }
+            else:
+                raise BaseException("the array isn't defined")
 
         elif(ChildCount == 3 and ctx.getChild(0).getText()=='('):
             '''
@@ -339,7 +381,7 @@ class myCpp20Visitor(cpp20Visitor):
                 return{
                     'type':right['type'],
                     'signed':True,
-                    'value':valueToReturn
+                        'value':valueToReturn
                 }
 
             elif(Operation == '='):
@@ -347,8 +389,15 @@ class myCpp20Visitor(cpp20Visitor):
                 对应语法： expression: leftExpression '=' expression
                 '''
                 # result = self.visit(ctx.expression())
-                print(left, right)
-                self.symbolTable.setProperty(left['name'], value = right['value'])
+                ChildCount=ctx.getChild(0).getChildCount()
+                if(ChildCount==1):
+                    #leftExpression为变量
+                    print(left," is an varible")
+                    self.symbolTable.setProperty(left['name'], value = right['value'])
+                else:
+                    #leftExpression为数组
+                    print(left," is an arrayItem")
+                    Builder.store(right['value'],left['address'])
                 return 
 
             elif(Operation == '|' or Operation == 'bitor' or Operation == '&' or Operation == 'bitand' or Operation == '^' or Operation == 'xor'):
@@ -430,9 +479,24 @@ class myCpp20Visitor(cpp20Visitor):
     def visitLeftExpression(self, ctx: cpp20Parser.LeftExpressionContext):
         if(ctx.getText()[-1]==']'):
             '''
-            对应语法：leftExpression:Identifier (LSQUARE expression RSQUARE)
+            对应语法：leftExpression:Identifier (LSQUARE DecimalLiteral RSQUARE)
             '''
-            #TODO:需要先写好数组的索引方式才能调用
+            index = self.symbolTable.getProperty(ctx.getChild(0).getText())
+            subscribe = int(ctx.getChild(2).getText())
+            if(isinstance(index.get_type(),ir.types.ArrayType)):
+                Builder = self.Builders[-1]
+                Address = Builder.gep(index.get_value(),[ir.Constant(int32,0),ir.Constant(int32,subscribe)],inbounds=True)
+                ValueToReturn = Builder.load(Address)
+                print("call arrayItem",ValueToReturn)
+                return{
+                    'type':index.get_type().element,
+                    'signed':True,
+                    'value':ValueToReturn,
+                    'address':Address
+                }
+            else:
+                raise BaseException("the array isn't defined")
+            
         else:
             '''
             对应语法：leftExpression:Identifier

@@ -18,8 +18,8 @@ class NameProperty:
         self.value = value
     def get_signed(self):
         return self.signed
-    def set_signed(self,signed):
-        return self.signed
+    def set_signed(self):
+        self.signed
 
 
 # 所有符号的属性
@@ -37,6 +37,7 @@ class NameTable:
 
     def enterScope(self):
         self.current_scope_level += 1
+        self.table.append({})
     
     def exitScope(self):
         if self.current_scope_level == 0:

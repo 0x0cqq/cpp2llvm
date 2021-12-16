@@ -44,22 +44,22 @@ class myCpp20Visitor(cpp20Visitor):
         self.symbolTable.addLocal(ctx.Identifier().getText(),
             NameProperty(
                 type=self.type,
-                value=self.visit(ctx.expression()))) # 这里可能还是得给一个初始的值，但是也未必        
+                value=self.visit(ctx.expression())['value'])) # 只需要记录虚拟寄存器即可        
         
 
-        return super().visitVarDeclWithInit(ctx)
+        return
 
     def visitVarDeclWithoutInit(self, ctx: cpp20Parser.VarDeclWithoutInitContext):
         '''
         对应语法：Identifier
         '''
-        print("varDeclWithOutInit")
+        print(f"varDeclWithOutInit: {ctx.Identifier().getText()}")
         
         self.symbolTable.addLocal(ctx.Identifier().getText(),
             NameProperty(
                 type=self.type,
                 value=None)) # 这里可能还是得给一个初始的值，但是也未必
-        return super().visitVarDeclWithoutInit(ctx)
+        return
 
     def visitVariableDeclarator(self, ctx: cpp20Parser.VariableDeclaratorContext):
         '''
@@ -163,25 +163,32 @@ class myCpp20Visitor(cpp20Visitor):
         return False
 
     def intConvert(self,src,target):
-        Builder = self.Builders[-1]        
-        if(src['type'].width == 1):
-            ValueToReturn= Builder.zext(src['value'],target['type'])
-            return{
-                'type':target['type'],
-                'signed':src['signed'],
-                'value':ValueToReturn
-            }
-        else:
-            if(src['signed']):
-                ValueToReturn = Builder.sext(src['value'],target['type'])
+        Builder = self.Builders[-1] 
+        if(target['type'].width >= src['type'].width): # 往大扩展   
+            if(src['type'].width == 1):
+                ValueToReturn= Builder.zext(src['value'],target['type'])
+                return{
+                    'type':target['type'],
+                    'signed':src['signed'],
+                    'value':ValueToReturn
+                }
             else:
-                ValueToReturn = Builder.zext(src['value'],target['type'])
+                if(src['signed']):
+                    ValueToReturn = Builder.sext(src['value'],target['type'])
+                else:
+                    ValueToReturn = Builder.zext(src['value'],target['type'])
+                return {
+                    'type':target['type'],
+                    'signed':src['signed'],
+                    'value':ValueToReturn
+                }
+        else: # 往小了转换，其实是 undefined 行为
+            ValueToReturn = Builder.trunc(src['value'],target['type'])
             return {
-                'type':target['type'],
-                'signed':src['signed'],
-                'value':ValueToReturn
+                    'type':target['type'],
+                    'signed':src['signed'],
+                    'value':ValueToReturn
             }
-        
             
     def intToDouble(self,llvmNum):
         Builder = self.Builders[-1]
@@ -193,6 +200,7 @@ class myCpp20Visitor(cpp20Visitor):
             'type':double,
             'value':ValueToReturn
         }
+    
 
     def toBool(self,llvmNum):
         Builder = self.Builders[-1]
@@ -205,6 +213,15 @@ class myCpp20Visitor(cpp20Visitor):
             'signed':True,
             'value':ValueToReturn
         }
+
+    def assignTypeConvert(self,left,right):
+        # 赋值语句中用的类型转换
+        # 强制把右侧的类型转换为左侧的类型
+        if(left['type'] != right['type']):
+            right['type'] = left['type']
+
+        else:
+            return left,right
     
     def exprTypeConvert(self,left,right):
         #left和right的符号类型不一致时，类型转换为一致，向大的类型转换
@@ -221,148 +238,154 @@ class myCpp20Visitor(cpp20Visitor):
         elif left['type']==double and self.isInt(right):
             right = self.intToDouble(right)
         return left,right
-    
 
     def visitExpression(self, ctx: cpp20Parser.ExpressionContext):
+        print(f"visitExpression:{ctx.getText()}, {ctx.getChildCount()}")
         ChildCount=ctx.getChildCount()
         Builder = self.Builders[-1]
         if(ChildCount == 1):
-          grandChildren = ctx.getChild(0).getChildCount()
-          if(grandChildren):
-              '''
-              对应语法：expression: Literals|functionCall;
-              '''
-              result = self.visit(ctx.getChild(0))
-              return result
-          else:
-              '''
-              对应语法：expression: Identifier
-              '''
-              symbol = self.symbolTable.getProperty(ctx.getText())
-              return{
-                'type':symbol.get_type(),
-                'signed':symbol.get_signed(),
-                'value':symbol.get_value()
-              }
+            grandChildren = ctx.getChild(0).getChildCount()
+            if(grandChildren):
+                '''
+                对应语法：expression: Literals|functionCall;
+                '''
+                result = self.visit(ctx.getChild(0))
+                return result
+            else:
+                '''
+                对应语法：expression: Identifier
+                '''
+                symbol = self.symbolTable.getProperty(ctx.getText())
+                return {
+                    'name':ctx.getText(),
+                    'type':symbol.get_type(),
+                    'signed':symbol.get_signed(),
+                    'value':symbol.get_value()
+                }
 
         elif(ChildCount == 2):
-          '''
-          对应语法：expression: NOT expression
-          '''  
-          Builder = self.Builders[-1]
-          result = self.visit(ctx.getChild(1))
-          if result['type'] == double:
-            ValueToReturn = Builder.fcmp_ordered('!=', result['value'], ir.Constant(int1,0))
-          else:
-            ValueToReturn = Builder.icmp_signed('!=', result['value'], ir.Constant(int1,0))
-          return {
-              'type':int1,
-              'signed':True,
-              'value':ValueToReturn
-          }
+            '''
+            对应语法：expression: NOT expression
+            '''  
+            Builder = self.Builders[-1]
+            result = self.visit(ctx.getChild(1))
+            if result['type'] == double:
+                ValueToReturn = Builder.fcmp_ordered('!=', result['value'], ir.Constant(int1,0))
+            else:
+                ValueToReturn = Builder.icmp_signed('!=', result['value'], ir.Constant(int1,0))
+            return {
+                'type':int1,
+                'signed':True,
+                'value':ValueToReturn
+            }
           
-        elif(ChildCount>3):
-          '''
-          对应语法：expression: expression '[' expression ']'
-          '''
-          #TODO：读数组？这个不太明白
-          print("array index")
+        elif(ChildCount > 3):
+            '''
+            对应语法：expression: expression '[' expression ']'
+            '''
+            #TODO：读数组？这个不太明白
+            print("array index")
 
         elif(ChildCount == 3 and ctx.getChild(0).getText()=='('):
-          '''
-          对应语法：expression: '(' expression ')'
-          '''
-          result = self.visit(ctx.getChild(1))
-          return result
+            '''
+            对应语法：expression: '(' expression ')'
+            '''
+            result = self.visit(ctx.getChild(1))
+            return result
 
         else:
-          Operation = ctx.getChild(1).getText()
-          left = self.visit(ctx.getChild(0))
-          right = self.visit(ctx.getChild(2))
-          if(self.isExprJudge(Operation)):
-            '''
-            对应语法： expression: expression '==' | '!=' | '<' | '<=' | '>' | '>=' expr
-            '''
-            left,right = self.exprTypeConvert(left,right)
-            if(left['type']==double):
-                valueToReturn = Builder.fcmp_ordered(Operation,left['value'],right['value'])
-            elif(left['type']==int32 or left['type'] == int64 or left['type'] == int8 or left['type']==int1):
-                if(left['signed']):
-                    valueToReturn = Builder.icmp_signed(Operation,left['value'],right['value'])
-                else:
-                    valueToReturn = Builder.icmp_unsigned(Operation,left['value'],right['value'])                
-            return{
-                'type':int1,
-                'signed':True,
-                'value':valueToReturn
-            }
+            Operation = ctx.getChild(1).getText()
+            print(f"Operation:{Operation},child0:{ctx.getChild(0).getText()},child2:{ctx.getChild(2).getText()}")
 
-          elif(Operation == '+' or Operation == '-' or Operation == '*' or Operation == '/' or Operation == '%' or Operation == '<<' or Operation == '>>'):
-            '''
-            对应语法：expression: expression '+'|'-'|'*'|'/'|'%' expression
-            '''
-            left,right = self.exprTypeConvert(left,right)
-            if(Operation == '+'):
-                valueToReturn = Builder.add(left['value'],right['value'])
-            elif(Operation == '-'):
-                valueToReturn = Builder.sub(left['value'],right['value'])
-            elif(Operation == '*'):
-                valueToReturn = Builder.mul(left['value'],right['value'])
-            elif(Operation == '/'):
-                valueToReturn = Builder.sdiv(left['value'],right['value'])
-            elif(Operation == '%'):
-                valueToReturn = Builder.srem(left['value'],right['value'])
-            elif(Operation == '<<'):
-                valueToReturn = Builder.shl(left['value'],right['value'])
-            elif(Operation == '>>'):
-                valueToReturn = Builder.lshr(left['value'],right['value'])
-            return{
-                'type':right['type'],
-                'signed':True,
-                'value':valueToReturn
-            }
+            left = self.visit(ctx.getChild(0))
+            right = self.visit(ctx.getChild(2))
+            if(self.isExprJudge(Operation)):
+                '''
+                对应语法： expression: expression '==' | '!=' | '<' | '<=' | '>' | '>=' expr
+                '''
+                left,right = self.exprTypeConvert(left,right)
+                if(left['type']==double):
+                    valueToReturn = Builder.fcmp_ordered(Operation,left['value'],right['value'])
+                elif(left['type']==int32 or left['type'] == int64 or left['type'] == int8 or left['type']==int1):
+                    if(left['signed']):
+                        valueToReturn = Builder.icmp_signed(Operation,left['value'],right['value'])
+                    else:
+                        valueToReturn = Builder.icmp_unsigned(Operation,left['value'],right['value'])                
+                return{
+                    'type':int1,
+                    'signed':True,
+                    'value':valueToReturn
+                }
 
-          elif(Operation == '='):
-            '''
-            对应语法： expression: leftExpression '=' expression
-            '''
+            elif(Operation == '+' or Operation == '-' or Operation == '*' or Operation == '/' or Operation == '%' or Operation == '<<' or Operation == '>>'):
+                '''
+                对应语法：expression: expression '+'|'-'|'*'|'/'|'%' expression
+                '''
+                left,right = self.exprTypeConvert(left,right)
+                if(Operation == '+'):
+                    valueToReturn = Builder.add(left['value'],right['value'])
+                elif(Operation == '-'):
+                    valueToReturn = Builder.sub(left['value'],right['value'])
+                elif(Operation == '*'):
+                    valueToReturn = Builder.mul(left['value'],right['value'])
+                elif(Operation == '/'):
+                    valueToReturn = Builder.sdiv(left['value'],right['value'])
+                elif(Operation == '%'):
+                    valueToReturn = Builder.srem(left['value'],right['value'])
+                elif(Operation == '<<'):
+                    valueToReturn = Builder.shl(left['value'],right['value'])
+                elif(Operation == '>>'):
+                    valueToReturn = Builder.lshr(left['value'],right['value'])
+                return{
+                    'type':right['type'],
+                    'signed':True,
+                    'value':valueToReturn
+                }
 
+            elif(Operation == '='):
+                '''
+                对应语法： expression: leftExpression '=' expression
+                '''
+                # result = self.visit(ctx.expression())
+                print(left, right)
+                self.symbolTable.setProperty(left['name'], value = right['value'])
+                return 
 
-          elif(Operation == '|' or Operation == 'bitor' or Operation == '&' or Operation == 'bitand' or Operation == '^' or Operation == 'xor'):
-            '''
-            对应语法： expression: expression BITOR|BITAND|XOR expression
-            '''
-            left,right = self.exprTypeConvert(left,right)
-            Signed = False
-            if left['signed'] or right['signed']:
-                Signed = True
-            if(Operation == '|' or Operation == 'bitor'):
-                ValueToReturn = Builder.or_(left['value'],right['value'])
-            elif(Operation == '&' or Operation == 'bitand' ):
-                ValueToReturn = Builder.and_(left['value'],right['value'])
-            elif(Operation == '^' or Operation == 'xor'):
-                ValueToReturn = Builder.xor(left['value'],right['value'])
-            return{
-                'type':left['type'],
-                'signed':Signed,
-                'value':ValueToReturn
-            }
-          
-          elif(Operation == '&&' or Operation == 'and' or Operation == '||' or Operation == 'or'):
-            '''
-            对应语法：expression AND|OR expression
-            '''
-            left = self.toBool(left)
-            right = self.toBool(right)
-            if(Operation == '&&' or Operation == 'and'):
-                ValueToReturn = Builder.and_(left['value'],right['value'])
-            elif(Operation == '||' or Operation == 'or'):
-                ValueToReturn = Builder.or_(left['value'],right['value'])
-            return{
-                'type':int1,
-                'signed':True,
-                'value':ValueToReturn
-            }
+            elif(Operation == '|' or Operation == 'bitor' or Operation == '&' or Operation == 'bitand' or Operation == '^' or Operation == 'xor'):
+                '''
+                对应语法： expression: expression BITOR|BITAND|XOR expression
+                '''
+                left,right = self.exprTypeConvert(left,right)
+                Signed = False
+                if left['signed'] or right['signed']:
+                    Signed = True
+                if(Operation == '|' or Operation == 'bitor'):
+                    ValueToReturn = Builder.or_(left['value'],right['value'])
+                elif(Operation == '&' or Operation == 'bitand' ):
+                    ValueToReturn = Builder.and_(left['value'],right['value'])
+                elif(Operation == '^' or Operation == 'xor'):
+                    ValueToReturn = Builder.xor(left['value'],right['value'])
+                return{
+                    'type':left['type'],
+                    'signed':Signed,
+                    'value':ValueToReturn
+                }
+            
+            elif(Operation == '&&' or Operation == 'and' or Operation == '||' or Operation == 'or'):
+                '''
+                对应语法：expression AND|OR expression
+                '''
+                left = self.toBool(left)
+                right = self.toBool(right)
+                if(Operation == '&&' or Operation == 'and'):
+                    ValueToReturn = Builder.and_(left['value'],right['value'])
+                elif(Operation == '||' or Operation == 'or'):
+                    ValueToReturn = Builder.or_(left['value'],right['value'])
+                return{
+                    'type':int1,
+                    'signed':True,
+                    'value':ValueToReturn
+                }
     pass     
      
     def visitLiterals(self, ctx: cpp20Parser.LiteralsContext):
@@ -414,6 +437,13 @@ class myCpp20Visitor(cpp20Visitor):
             '''
             对应语法：leftExpression:Identifier
             '''
+            symbol = self.symbolTable.getProperty(ctx.getText())
+            return {
+                    'name':ctx.getText(),
+                    'type':symbol.get_type(),
+                    'signed':symbol.get_signed(),
+                    'value':symbol.get_value()
+                }
 
 if __name__ == "__main__":
     input_stream = FileStream("test2.cpp")

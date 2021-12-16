@@ -54,10 +54,19 @@ class NameTable:
             raise BaseException("local name already exist")
         self.table[self.current_scope_level].update({name : property})
     
-    def getProperty(self, name : str):
+    def getProperty(self, name : str) -> NameProperty:
         for i in range(self.current_scope_level, -1, -1):
             if(self.table[i].get(name) != None):
                 return self.table[i].get(name)
+        raise BaseException("name not exist")
+    
+    def setProperty(self, name : str, value):
+        for i in range(self.current_scope_level, -1, -1):
+            if(self.table[i].get(name) != None):
+                property = self.table[i].get(name)
+                property.set_value(value)
+                self.table[i].update({name : property})
+                return
         raise BaseException("name not exist")
 
 # 类表

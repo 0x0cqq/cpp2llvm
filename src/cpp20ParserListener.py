@@ -1,4 +1,4 @@
-# Generated from grammar/cpp20Parser.g4 by ANTLR 4.9
+# Generated from grammar/cpp20Parser.g4 by ANTLR 4.9.3
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .cpp20Parser import cpp20Parser
@@ -287,12 +287,30 @@ class cpp20ParserListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by cpp20Parser#variableDeclaration.
-    def enterVariableDeclaration(self, ctx:cpp20Parser.VariableDeclarationContext):
+    # Enter a parse tree produced by cpp20Parser#varDeclWithoutInit.
+    def enterVarDeclWithoutInit(self, ctx:cpp20Parser.VarDeclWithoutInitContext):
         pass
 
-    # Exit a parse tree produced by cpp20Parser#variableDeclaration.
-    def exitVariableDeclaration(self, ctx:cpp20Parser.VariableDeclarationContext):
+    # Exit a parse tree produced by cpp20Parser#varDeclWithoutInit.
+    def exitVarDeclWithoutInit(self, ctx:cpp20Parser.VarDeclWithoutInitContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#varDeclWithInit.
+    def enterVarDeclWithInit(self, ctx:cpp20Parser.VarDeclWithInitContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#varDeclWithInit.
+    def exitVarDeclWithInit(self, ctx:cpp20Parser.VarDeclWithInitContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#variableDeclarator.
+    def enterVariableDeclarator(self, ctx:cpp20Parser.VariableDeclaratorContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#variableDeclarator.
+    def exitVariableDeclarator(self, ctx:cpp20Parser.VariableDeclaratorContext):
         pass
 
 

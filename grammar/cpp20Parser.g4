@@ -34,7 +34,7 @@ accessSpecifier : PUBLIC | PROTECTED | PRIVATE;
 
 accessLabel : accessSpecifier COLON;
 
-memberDeclaration : functionDeclaration | variableDeclaration;
+memberDeclaration : functionDeclaration | variableDeclarator;
 
 constructorDeclaration :  Identifier LPAREN (functionParameter (COMMA functionParameter)*)? RPAREN  (COLON functionCall)? block;
 
@@ -89,7 +89,7 @@ statement :
     | breakStatement
     | continueStatement
     | block
-    | variableDeclaration
+    | variableDeclarator
     | arrayDeclarator
     | expression? SEMI;
 
@@ -121,15 +121,19 @@ continueStatement : CONTINUE SEMI;
 
 declaration : 
     arrayDeclarator
-    | variableDeclaration
+    | variableDeclarator
     | functionDeclaration    
     | classDefinition;
 
 arrayDeclarator : 
     typeSpecifier Identifier LSQUARE expression RSQUARE (ASSIGN LBRACE expression (COMMA expression)* LBRACE)?;
 
-variableDeclaration : 
-    typeSpecifier Identifier (ASSIGN expression)? (COMMA Identifier (ASSIGN expression)?)* SEMI;
+variableDeclaration: Identifier  #varDeclWithoutInit
+    | Identifier ASSIGN expression #varDeclWithInit
+    ;
+
+variableDeclarator : 
+    typeSpecifier variableDeclaration (COMMA variableDeclaration)* SEMI;
 
 functionDeclaration : 
     typeSpecifier Identifier LPAREN (functionParameter (COMMA functionParameter)*)? RPAREN block;

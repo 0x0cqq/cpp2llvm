@@ -26,7 +26,61 @@ class myCpp20Visitor(cpp20Visitor):
         # 待生成的llvm语句块
         # 每生成一块语句时，将当前语句块加到末尾，以self.Builder[-1]调用
         self.Builders=[]
+
+        self.symbolTable = NameTable()
  
+
+    def getTypeFromText(name : str) :
+        if(name == "int"):
+            return int32
+        elif(name == "int16"):
+            return int16
+
+    def visitVarDeclWithInit(self, ctx: cpp20Parser.VarDeclWithInitContext):
+        '''
+        对应语法：Identifier ASSIGN expression
+        '''
+        print("varDeclWithInit")
+        self.symbolTable.addLocal(ctx.Identifier().getText(),
+            NameProperty(
+                type=self.type,
+                value=self.visit(ctx.expression()))) # 这里可能还是得给一个初始的值，但是也未必        
+        
+
+        return super().visitVarDeclWithInit(ctx)
+
+    def visitVarDeclWithoutInit(self, ctx: cpp20Parser.VarDeclWithoutInitContext):
+        '''
+        对应语法：Identifier
+        '''
+        print("varDeclWithOutInit")
+        
+        self.symbolTable.addLocal(ctx.Identifier().getText(),
+            NameProperty(
+                type=self.type,
+                value=None)) # 这里可能还是得给一个初始的值，但是也未必
+        return super().visitVarDeclWithoutInit(ctx)
+
+    def visitVariableDeclarator(self, ctx: cpp20Parser.VariableDeclaratorContext):
+        '''
+        对应语法 ：typeSpecifier variableDeclaration (COMMA variableDeclaration)* SEMI;
+        '''
+        print("Variable Declaration")
+        print(f"{len(ctx.variableDeclaration())} variables: ",end='')
+
+        for declaration in ctx.variableDeclaration():
+            print(declaration.getChildCount())
+        
+        self.type = self.visit(ctx.typeSpecifier())
+        
+        for declaration in ctx.variableDeclaration():
+            self.visit(declaration)
+
+        del self.type
+        return
+        
+    def visitArrayDeclarator(self, ctx: cpp20Parser.ArrayDeclaratorContext):
+        return super().visitArrayDeclarator(ctx)
     def visitFunctionDeclaration(self, ctx: cpp20Parser.FunctionDeclarationContext):
         print(f"visitFunctionDeclaration: {ctx.Identifier().getText()}",) #test for debug
         '''
@@ -39,9 +93,9 @@ class myCpp20Visitor(cpp20Visitor):
         ParameterList = [] 
         #生成llvm函数
         LLVMFuncType = ir.FunctionType(ReturnType,ParameterList)
-        LLVMFunc = ir.Function(self.Module, LLVMFuncType, name= FunctionName)
+        LLVMFunc = ir.Function(self.Module, LLVMFuncType, name=FunctionName)
         #储存函数为block
-        Block = LLVMFunc.append_basic_block(name = FunctionName)
+        Block = LLVMFunc.append_basic_block(name="__"+FunctionName)
         Builder= ir.IRBuilder(Block)
         self.Builders.append(Builder)
         #访问函数块，返回值到ValueToReturn
@@ -162,7 +216,7 @@ class myCpp20Visitor(cpp20Visitor):
                 left = self.intConvert(left,right)
             else:
                 right = self.intConvert(right,left)
-        elif self.isInt(left) and right['type']==double:
+        elif self.isInt(left) and right['type']==double: 
             left = self.intToDouble(left)
         elif left['type']==double and self.isInt(right):
             right = self.intToDouble(right)
@@ -182,7 +236,7 @@ class myCpp20Visitor(cpp20Visitor):
 
         elif(ChildCount == 1):
           '''
-          对应语法：expression: Literals;
+          对应语法：expression: literals;
           '''
           result = self.visit(ctx.getChild(0))
           return result

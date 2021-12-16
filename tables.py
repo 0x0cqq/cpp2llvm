@@ -4,12 +4,17 @@ import copy
 # 构成：
 # type, ... 
 class NameProperty: 
-    def __init__(self, type : str):
+    def __init__(self, type, value):
         self.type = type
+        self.value = value
     def get_type(self):
         return self.type
-    def set_type(self, type : str):
+    def set_type(self, type):
         self.type = type
+    def get_value(self):
+        return self.value
+    def set_value(self, value):
+        self.value = value
 
 
 # 所有符号的属性

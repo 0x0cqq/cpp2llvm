@@ -39,10 +39,10 @@ class myCpp20Visitor(cpp20Visitor):
         '''
         对应语法：Identifier ASSIGN expression
         '''
-        print("varDeclWithInit")
+        # print("varDeclWithInit")
         self.symbolTable.addLocal(ctx.Identifier().getText(),
             NameProperty(
-                type=self.type,
+                type= self.type,
                 value=self.visit(ctx.expression())['value'])) # 只需要记录虚拟寄存器即可        
         
 
@@ -52,7 +52,7 @@ class myCpp20Visitor(cpp20Visitor):
         '''
         对应语法：Identifier
         '''
-        print(f"varDeclWithOutInit: {ctx.Identifier().getText()}")
+        # print(f"varDeclWithOutInit: {ctx.Identifier().getText()}")
         
         self.symbolTable.addLocal(ctx.Identifier().getText(),
             NameProperty(
@@ -64,14 +64,16 @@ class myCpp20Visitor(cpp20Visitor):
         '''
         对应语法 ：typeSpecifier variableDeclaration (COMMA variableDeclaration)* SEMI;
         '''
-        print("Variable Declaration")
-        print(f"{len(ctx.variableDeclaration())} variables: ",end='')
+        # print("Variable Declaration")
+        # print(f"{len(ctx.variableDeclaration())} variables: ",end='')
 
-        for declaration in ctx.variableDeclaration():
-            print(declaration.getChildCount())
+        # for declaration in ctx.variableDeclaration():
+        #     print(declaration.getChildCount())
         
         self.type = self.visit(ctx.typeSpecifier())
         
+        print("type:", self.type)
+
         for declaration in ctx.variableDeclaration():
             self.visit(declaration)
 
@@ -105,28 +107,86 @@ class myCpp20Visitor(cpp20Visitor):
             ''''''
         return 
 
+    def visitReturnStatement(self, ctx: cpp20Parser.ReturnStatementContext):
+        '''
+            对应语法： RETURN expression? SEMI;
+        '''
+        if(ctx.expression() is None):
+            self.Builders[-1].ret_void()
+        else:
+            self.Builders[-1].ret(self.visit(ctx.expression())['value'])
+
+    def visitFunctionParameter(self, ctx: cpp20Parser.FunctionParameterContext):
+        '''
+        
+            对应语法：typeSpecifier Identifier;
+        '''
+        return {
+            "name": ctx.Identifier().getText(),
+            "type": self.visit(ctx.typeSpecifier())
+        }
+
+    def visitFunctionCall(self, ctx: cpp20Parser.FunctionCallContext):
+        '''
+        对应语法：functionCall : Identifier LPAREN (expression (COMMA expression)*)? RPAREN;
+        '''
+        Builder = self.Builders[-1]
+        functionName = ctx.Identifier().getText()
+        property = self.symbolTable.getProperty(functionName)
+        # print(property.get_type())
+        if(property.get_type().__class__.__name__ == ir.FunctionType.__name__):
+            # 参数列表
+            paramList = []
+            for expression in ctx.expression():
+                paramList.append(self.visit(expression)['value'])
+            # 检查合法性
+            print("paramList & argsList: ", paramList,property.get_type().args)
+            if(len(paramList) != len(property.get_type().args)):
+                raise BaseException("wrong args number")
+            for real_param, param in zip(paramList,property.get_type().args):
+                if(param != real_param.type):
+                    raise BaseException("wrong args type")
+            # 函数调用
+            return Builder.call(property.get_value(), paramList, name='', cconv=None, tail=False, fastmath=())
+        else:
+            raise BaseException("not a function name")
+
     def visitFunctionDeclaration(self, ctx: cpp20Parser.FunctionDeclarationContext):
-        print(f"visitFunctionDeclaration: {ctx.Identifier().getText()}",) #test for debug
+        #print(f"visitFunctionDeclaration: {ctx.Identifier().getText()}",) #test for debug
         '''
         对应语法：typeSpecifier Identifier '(' (functionParameter (COMMA functionParameter)*)? ')' block
         '''
         #函数名
         FunctionName = ctx.getChild(1).getText()
-        #TODO:获取参数列表，填充到ParameterList里
+        #获取参数列表，填充到ParameterList里
         ReturnType = self.visit(ctx.getChild(0))
-        ParameterList = [] 
+        ParameterList = []
+        for param in ctx.functionParameter():
+            ParameterList.append(self.visit(param))
+        ParameterList = tuple(ParameterList)
+        print(ParameterList)
+        ParameterTypeTuple = (param['type'] for param in ParameterList)
+        # if(ParameterList == []):
+        #     ParameterList.append(None)
         #生成llvm函数
-        LLVMFuncType = ir.FunctionType(ReturnType,ParameterList)
+        LLVMFuncType = ir.FunctionType(ReturnType,ParameterTypeTuple)
         LLVMFunc = ir.Function(self.Module, LLVMFuncType, name=FunctionName)
+        # 将函数原型存入符号表
+        self.symbolTable.addGlobal(FunctionName,NameProperty(type = LLVMFuncType,value = LLVMFunc))
         #储存函数为block
         Block = LLVMFunc.append_basic_block(name="__"+FunctionName)
         Builder= ir.IRBuilder(Block)
         self.Builders.append(Builder)
         #进入作用域
         self.symbolTable.enterScope()
+        #将函数形参存入符号表
+        for param, argsValue in zip(ParameterList,LLVMFunc.args):
+            self.symbolTable.addLocal(param['name'], NameProperty(param['type'], argsValue))
         #访问函数块，返回值到ValueToReturn
-        ChildCount = ctx.getChildCount()
-        ValueToReturn=self.visit(ctx.getChild(ChildCount-1))
+        ValueToReturn=self.visit(ctx.block())
+        #可能还要强制加上一个ret void，不然不知道会不会有bug。。。
+        # if(self.Builders[-1].)
+        # self.Builders[-1].ret_void()
         #退出作用域
         self.symbolTable.exitScope()
 
@@ -150,7 +210,7 @@ class myCpp20Visitor(cpp20Visitor):
             return int32
         elif(ctx.getText()=='short'):
             return int16
-        elif(ctx.getText()=='long long'):
+        elif(ctx.getText()=='longlong'):
             return int64
 
     def isExprJudge(self,realText):
@@ -229,6 +289,18 @@ class myCpp20Visitor(cpp20Visitor):
             'type':double,
             'value':ValueToReturn
         }
+
+    
+    def doubleToInt(self,llvmNum,target):
+        Builder = self.Builders[-1]
+        if(llvmNum['signed']):
+            ValueToReturn = Builder.fptosi(llvmNum['value'],target['type'])
+        else:
+            ValueToReturn = Builder.fptoui(llvmNum['value'],target['type'])
+        return {
+            'type':target['type'],
+            'value':ValueToReturn
+        }
     
 
     def toBool(self,llvmNum):
@@ -247,10 +319,15 @@ class myCpp20Visitor(cpp20Visitor):
         # 赋值语句中用的类型转换
         # 强制把右侧的类型转换为左侧的类型
         if(left['type'] != right['type']):
-            right['type'] = left['type']
-
-        else:
-            return left,right
+            if(self.isInt(left) and self.isInt(right)):
+                right = self.intConvert(right,left)
+            elif(self.isInt(left) and self.isInt(right)==False):
+                right = self.doubleToInt(right,left)
+            elif(self.isInt(left)==False and self.isInt(right)):
+                right = self.intToDouble(right)
+            else:
+                pass
+        return left,right
     
     def exprTypeConvert(self,left,right):
         #left和right的符号类型不一致时，类型转换为一致，向大的类型转换
@@ -269,7 +346,7 @@ class myCpp20Visitor(cpp20Visitor):
         return left,right
 
     def visitExpression(self, ctx: cpp20Parser.ExpressionContext):
-        print(f"visitExpression:{ctx.getText()}, {ctx.getChildCount()}")
+        # print(f"visitExpression:{ctx.getText()}, {ctx.getChildCount()}")
         ChildCount=ctx.getChildCount()
         Builder = self.Builders[-1]
         if(ChildCount == 1):
@@ -337,7 +414,7 @@ class myCpp20Visitor(cpp20Visitor):
 
         else:
             Operation = ctx.getChild(1).getText()
-            print(f"Operation:{Operation},child0:{ctx.getChild(0).getText()},child2:{ctx.getChild(2).getText()}")
+            # print(f"Operation:{Operation},child0:{ctx.getChild(0).getText()},child2:{ctx.getChild(2).getText()}")
 
             left = self.visit(ctx.getChild(0))
             right = self.visit(ctx.getChild(2))
@@ -393,6 +470,7 @@ class myCpp20Visitor(cpp20Visitor):
                 if(ChildCount==1):
                     #leftExpression为变量
                     print(left," is an varible")
+                    left,right = self.assignTypeConvert(left,right) # 强制类型转换
                     self.symbolTable.setProperty(left['name'], value = right['value'])
                 else:
                     #leftExpression为数组
@@ -435,12 +513,18 @@ class myCpp20Visitor(cpp20Visitor):
                     'signed':True,
                     'value':ValueToReturn
                 }
-    pass     
-     
+
+    def visitBlock(self, ctx: cpp20Parser.BlockContext):
+        self.symbolTable.enterScope()
+        super().visitBlock(ctx)
+        self.symbolTable.exitScope()
+        return
+
     def visitLiterals(self, ctx: cpp20Parser.LiteralsContext):
         result = self.visit(ctx.getChild(0))
         return result
-    
+
+
     def visitIntegerLiteral(self, ctx: cpp20Parser.IntegerLiteralContext):
         Signed = True
         if(ctx.getText()[-2:] == 'll' or ctx.getText()[-2:] == 'LL'):

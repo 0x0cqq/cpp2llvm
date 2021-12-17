@@ -1,5 +1,6 @@
 from antlr4 import *
 from llvmlite.ir.values import ReturnValue
+import sys
 
 from src.cpp20Lexer import cpp20Lexer
 from src.cpp20Parser import cpp20Parser
@@ -73,7 +74,7 @@ class myCpp20Visitor(cpp20Visitor):
         
         self.type = self.visit(ctx.typeSpecifier())
         
-        print("type:", self.type)
+        # print("type:", self.type)
 
         for declaration in ctx.variableDeclaration():
             self.visit(declaration)
@@ -141,7 +142,7 @@ class myCpp20Visitor(cpp20Visitor):
             for expression in ctx.expression():
                 paramList.append(self.visit(expression)['value'])
             # 检查合法性
-            print("paramList & argsList: ", paramList,property.get_type().args)
+            # print("paramList & argsList: ", paramList,property.get_type().args)
             if(len(paramList) != len(property.get_type().args)):
                 raise BaseException("wrong args number")
             for real_param, param in zip(paramList,property.get_type().args):
@@ -166,10 +167,11 @@ class myCpp20Visitor(cpp20Visitor):
         for param in ctx.functionParameter():
             ParameterList.append(self.visit(param))
         ParameterList = tuple(ParameterList)
-        print(ParameterList)
+        # print(ParameterList)
         ParameterTypeTuple = (param['type'] for param in ParameterList)
         # if(ParameterList == []):
         #     ParameterList.append(None)
+        # print("print par", ParameterTypeTuple)
         #生成llvm函数
         LLVMFuncType = ir.FunctionType(ReturnType,ParameterTypeTuple)
         LLVMFunc = ir.Function(self.Module, LLVMFuncType, name=FunctionName)
@@ -207,6 +209,16 @@ class myCpp20Visitor(cpp20Visitor):
         Type = self.visit(ctx.getChild(0))
         return Type
     
+    def visitRealTypeSpecifier(self, ctx: cpp20Parser.RealTypeSpecifierContext):
+        return double
+    
+    def visitBooleanTypeSpecifier(self, ctx: cpp20Parser.BooleanTypeSpecifierContext):
+        return int1
+
+    def visitCharTypeSpecifier(self, ctx: cpp20Parser.CharTypeSpecifierContext):
+        return int8
+    
+
     def visitIntegerTypeSpecifier(self, ctx: cpp20Parser.IntegerTypeSpecifierContext):
         if(ctx.getText()== 'int' or ctx.getText() == 'long'):
             return int32
@@ -373,19 +385,31 @@ class myCpp20Visitor(cpp20Visitor):
 
         elif(ChildCount == 2):
             '''
-            对应语法：expression: NOT expression
+            对应语法：expression: NOT expression | - expression
             '''  
             Builder = self.Builders[-1]
             result = self.visit(ctx.getChild(1))
-            if result['type'] == double:
-                ValueToReturn = Builder.fcmp_ordered('!=', result['value'], ir.Constant(int1,0))
-            else:
-                ValueToReturn = Builder.icmp_signed('!=', result['value'], ir.Constant(int1,0))
-            return {
-                'type':int1,
-                'signed':True,
-                'value':ValueToReturn
-            }
+            if(ctx.getChild(0).getText() == '!'):
+                if result['type'] == double:
+                    ValueToReturn = Builder.fcmp_ordered('!=', result['value'], ir.Constant(int1,0))
+                else:
+                    ValueToReturn = Builder.icmp_signed('!=', result['value'], ir.Constant(int1,0))
+                return {
+                    'type':int1,
+                    'signed':True,
+                    'value':ValueToReturn
+                }
+            elif(ctx.getChild(0).getText() == '-'):
+                if result['type'] == double:
+                    ValueToReturn = Builder.fneg(result['value'])
+                else:
+                    ValueToReturn = Builder.neg(result['value'])
+                return {
+                    'type':result['type'],
+                    'signed':True,
+                    'value':ValueToReturn
+                }
+                
           
         elif(ChildCount > 3):
             '''
@@ -783,7 +807,15 @@ class myCpp20Visitor(cpp20Visitor):
         return
         
 if __name__ == "__main__":
-    input_stream = FileStream("test2.cpp")
+    if(len(sys.argv) < 2):
+        filename = "test2.cpp"
+        outputfilename = None
+    else:
+        filename = sys.argv[1]
+        outputfilename = sys.argv[2] 
+    # print(filename)      
+    
+    input_stream = FileStream(filename)
     # lexer
     lexer = cpp20Lexer(input_stream)
     stream = CommonTokenStream(lexer)
@@ -793,5 +825,9 @@ if __name__ == "__main__":
     print(tree.toStringTree(recog=parser))
     visitor = myCpp20Visitor()
     visitor.visit(tree)
-    print(visitor.Module)
+    if(outputfilename):
+        with open(outputfilename, 'w') as f:
+            f.write(str(visitor.Module))
+    else:
+        print(visitor.Module)
     pass

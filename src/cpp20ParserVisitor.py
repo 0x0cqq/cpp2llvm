@@ -139,6 +139,11 @@ class cpp20ParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by cpp20Parser#forExprSet.
+    def visitForExprSet(self, ctx:cpp20Parser.ForExprSetContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by cpp20Parser#returnStatement.
     def visitReturnStatement(self, ctx:cpp20Parser.ReturnStatementContext):
         return self.visitChildren(ctx)

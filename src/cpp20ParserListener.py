@@ -242,6 +242,15 @@ class cpp20ParserListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by cpp20Parser#forExprSet.
+    def enterForExprSet(self, ctx:cpp20Parser.ForExprSetContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#forExprSet.
+    def exitForExprSet(self, ctx:cpp20Parser.ForExprSetContext):
+        pass
+
+
     # Enter a parse tree produced by cpp20Parser#returnStatement.
     def enterReturnStatement(self, ctx:cpp20Parser.ReturnStatementContext):
         pass

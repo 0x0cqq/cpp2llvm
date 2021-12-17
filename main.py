@@ -26,6 +26,7 @@ class myCpp20Visitor(cpp20Visitor):
         # 待生成的llvm语句块
         # 每生成一块语句时，将当前语句块加到末尾，以self.Builder[-1]调用
         self.Builders=[]
+
         # 符号表
         self.symbolTable = NameTable()
 
@@ -151,6 +152,7 @@ class myCpp20Visitor(cpp20Visitor):
         else:
             raise BaseException("not a function name")
 
+    
     def visitFunctionDeclaration(self, ctx: cpp20Parser.FunctionDeclarationContext):
         #print(f"visitFunctionDeclaration: {ctx.Identifier().getText()}",) #test for debug
         '''
@@ -592,7 +594,135 @@ class myCpp20Visitor(cpp20Visitor):
                     'signed':symbol.get_signed(),
                     'value':symbol.get_value()
                 }
+    
+    
+    def visitWhileStatement(self, ctx: cpp20Parser.WhileStatementContext):
+        '''
+        对应语法：WHILE LPAREN expression RPAREN statement
+        '''
+        Builder = self.Builders[-1]
+        #新建三个块，代表判断条件，while循环内部块，while循环外
+        expressionBlock = Builder.append_basic_block()
+        whileStatementBlock = Builder.append_basic_block()
+        endWhileBlock = Builder.append_basic_block()
+        
+        #expressionBlock
+        self.Builders.pop()
+        newBuilder = ir.IRBuilder(expressionBlock)
+        self.Builders.append(newBuilder)
+        result = self.visit(ctx.getChild(2))
+        condition = self.toBool(result)
+        newBuilder.cbranch(condition['value'],whileStatementBlock,endWhileBlock)
+        
+        #whileStatementBlock
+        self.Builders.pop()
+        newBuilder = ir.IRBuilder(whileStatementBlock)
+        self.Builders.append(newBuilder)
+        self.visit(ctx.getChild(4))
+        newBuilder.branch(expressionBlock)
 
+        #endWhileBlock
+        self.Builders.pop()
+        newBuilder = ir.IRBuilder(endWhileBlock)
+        self.Builders.append(newBuilder)
+        
+        return
+
+    def visitDoWhileStatement(self, ctx: cpp20Parser.DoWhileStatementContext):
+        '''
+        对应语法：DO statement WHILE LPAREN expression RPAREN SEMI;
+        '''
+        Builder = self.Builders[-1]
+        #新建语法块，doStatementBlock,expressionblock,endWhileBlock
+        doStatementBlock = Builder.append_basic_block()
+        expressionBlock = Builder.append_basic_block()
+        endWhileBlock = Builder.append_basic_block()
+        
+        #doStatementBlock
+        self.Builders.pop()
+        newBuilder = ir.IRBuilder(doStatementBlock)
+        self.Builders.append(newBuilder)
+        self.visit(ctx.getChild(1))
+        newBuilder.branch(expressionBlock)
+
+        #expressionBlock
+        self.Builders.pop()
+        newBuilder = ir.IRBuilder(expressionBlock)
+        self.Builders.append(newBuilder)
+        result = self.visit(ctx.getChild(4))
+        condition = self.toBool(result)
+        newBuilder.cbranch(condition['value'],doStatementBlock,endWhileBlock)
+
+        #endWhileBlock
+        self.Builders.pop()
+        newBuilder = ir.IRBuilder(endWhileBlock)
+        self.Builders.append(newBuilder)
+        
+        return
+
+    def visitForStatement(self, ctx: cpp20Parser.ForStatementContext):
+        '''
+        对应语法：FOR LPAREN forExprSet? SEMI expression? SEMI forExprSet? RPAREN statement;
+        '''
+        Builder = self.Builders[-1]
+        #判断三个expression是否存在
+        ChildCount = ctx.getChildCount()
+        flag1 = True
+        flag2 = True
+        flag3 = True
+
+        if(ctx.getChild(2).getText()==';'):
+            flag1 = False
+        for i in range(ChildCount-1):
+            text1 = ctx.getChild(i).getText()
+            text2 = ctx.getChild(i+1).getText()
+            if(text1 == ';' and text2 != ';'):
+                expressionIndex = i + 1
+                break
+            if(text1 == text2):
+                flag2 = False
+        if(ctx.getChild(ChildCount-3).getText()==';'):
+            flag3 = False
+        
+        #运行第一个forExprSet的语句
+        if(flag1):
+            self.visit(ctx.getChild(2))
+
+        #新建语法块，JudgeBlock,loopBlock,endLoopBlock
+        if(flag2):
+            JudgeBlock = Builder.append_basic_block()
+            endLoopBlock = Builder.append_basic_block()
+        loopBlock = Builder.append_basic_block()
+
+        #JudgeBlock
+        if(flag2):
+            self.Builders.pop()
+            newBuilder = ir.IRBuilder(JudgeBlock)
+            self.Builders.append(newBuilder)
+            result = self.visit(ctx.getChild(expressionIndex))
+            condition = self.toBool(result)
+            newBuilder.cbranch(condition['value'],loopBlock,endLoopBlock)
+
+        #loopBlock
+        self.Builders.pop()
+        newBuilder = ir.IRBuilder(loopBlock)
+        self.Builders.append(newBuilder)
+        self.visit(ctx.getChild(ChildCount-1))
+        if(flag3):
+            self.visit(ctx.getChild(ChildCount-3))
+        if(flag2):
+            newBuilder.branch(JudgeBlock)
+        else:
+            newBuilder.branch(loopBlock)
+
+        #endLoopBlock
+        if(flag2):
+            self.Builders.pop()
+            newBuilder = ir.IRBuilder(endLoopBlock)
+            self.Builders.append(newBuilder)
+
+        return
+        
 if __name__ == "__main__":
     input_stream = FileStream("test2.cpp")
     # lexer

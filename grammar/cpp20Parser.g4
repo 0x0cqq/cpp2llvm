@@ -108,7 +108,8 @@ whileStatement : WHILE LPAREN expression RPAREN statement;
 
 doWhileStatement : DO statement WHILE LPAREN expression RPAREN SEMI;
 
-forStatement : FOR LPAREN expression? SEMI expression? SEMI expression? RPAREN statement;
+forStatement : FOR LPAREN forExprSet? SEMI expression? SEMI forExprSet? RPAREN statement;
+forExprSet: expression (COMMA expression)*;
 
 returnStatement : RETURN expression? SEMI;
 

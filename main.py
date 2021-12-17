@@ -724,12 +724,13 @@ class myCpp20Visitor(cpp20Visitor):
         if(flag1):
             self.visit(ctx.getChild(2))
 
-        #新建语法块，JudgeBlock,loopBlock,endLoopBlock
+        #新建语法块，JudgeBlock,loopBlock,forExpr3Block,endLoopBlock
         JudgeBlock = Builder.append_basic_block()
         loopBlock = Builder.append_basic_block()
+        forExpr3Block = Builder.append_basic_block()
         endLoopBlock = Builder.append_basic_block()
         self.blockToBreak.append(endLoopBlock)
-        self.blockToContinue.append(JudgeBlock)
+        self.blockToContinue.append(forExpr3Block)
         
         #JudgeBlock
         if(flag2):
@@ -744,13 +745,18 @@ class myCpp20Visitor(cpp20Visitor):
         self.Builders.pop()
         self.Builders.append(ir.IRBuilder(loopBlock))
         self.visit(ctx.getChild(ChildCount-1))
+        if(not self.Builders[-1].block.is_terminated):
+            self.Builders[-1].branch(forExpr3Block)
+
+        #forExpr3Block
+        self.Builders.pop()
+        self.Builders.append(ir.IRBuilder(forExpr3Block))
         if(flag3):
             self.visit(ctx.getChild(ChildCount-3))
-        if(not self.Builders[-1].block.is_terminated):
-            if(flag2):
-                self.Builders[-1].branch(JudgeBlock)
-            else:
-                self.Builders[-1].branch(loopBlock)    
+        if(flag2):
+            self.Builders[-1].branch(JudgeBlock)
+        else:
+            self.Builders[-1].branch(loopBlock)    
 
 
         #endLoopBlock
@@ -823,11 +829,8 @@ class myCpp20Visitor(cpp20Visitor):
 
     def visitBreakStatement(self, ctx: cpp20Parser.BreakStatementContext):
         if self.blockToBreak:
-            print("enter breakStatement")
             Builder = self.Builders[-1]
-            print(self.blockToBreak[-1])
             Builder.branch(self.blockToBreak[-1])
-            print("successfully branch")
         else:
             raise BaseException("cannot break")        
         return

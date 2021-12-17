@@ -723,6 +723,65 @@ class myCpp20Visitor(cpp20Visitor):
 
         return
         
+    def visitIfStatement(self, ctx:cpp20Parser.IfStatementContext):
+        '''
+        ifStatement : IF LPAREN expression RPAREN statement (ELSE statement)?;
+        '''
+        print(f"visitIfStatement:{ctx.getText()}, {ctx.getChildCount()}")
+        self.symbolTable.enterScope()
+        ChildCount=ctx.getChildCount()
+        Builder = self.Builders[-1]
+        TrueBlock = Builder.append_basic_block()
+
+        #if else的情况
+        if len(ctx.statement())==2:
+            FalseBlock = Builder.append_basic_block()
+            EndBlock = Builder.append_basic_block()
+            
+            #条件跳转
+            result = self.visit(ctx.getChild(2))
+            Builder.cbranch(result['value'], TrueBlock, FalseBlock)
+            
+            #if块
+            TrueBlockBuilder = ir.IRBuilder(TrueBlock)
+            self.Builders.pop()
+            self.Builders.append(TrueBlockBuilder)
+            self.visit(ctx.getChild(4))
+            TrueBlockBuilder.branch(EndBlock)
+            
+            #else块
+            FalseBlockBuilder = ir.IRBuilder(FalseBlock)
+            self.Builders.pop()
+            self.Builders.append(FalseBlockBuilder)
+            self.visit(ctx.getChild(6))
+            FalseBlockBuilder.branch(EndBlock)
+            
+            #endif标识符
+            self.Builders.pop()
+            self.Builders.append(ir.IRBuilder(EndBlock))
+            
+        #只有if没有else的情况
+        else:
+            EndBlock = Builder.append_basic_block()
+            
+            #条件跳转
+            result = self.visit(ctx.getChild(2))
+            Builder.cbranch(result['value'], TrueBlock, EndBlock)
+            
+            #if块
+            TrueBlockBuilder = ir.IRBuilder(TrueBlock)
+            self.Builders.pop()
+            self.Builders.append(TrueBlockBuilder)
+            self.visit(ctx.getChild(4))
+            TrueBlockBuilder.branch(EndBlock)
+            
+            #endif标识符
+            self.Builders.pop()
+            self.Builders.append(ir.IRBuilder(EndBlock))
+
+        self.symbolTable.exitScope()
+        return
+        
 if __name__ == "__main__":
     input_stream = FileStream("test2.cpp")
     # lexer

@@ -124,13 +124,12 @@ class myCpp20Visitor(cpp20Visitor):
         del self.type
         return
     
-    def visitArrayDeclarator(self, ctx: cpp20Parser.ArrayDeclaratorContext):
+    def visitNormalArrDecl(self, ctx: cpp20Parser.NormalArrDeclContext):
         '''
         对应语法：typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN LBRACE expression (COMMA expression)* RBRACE)?;
         '''
         #数组长度
         ArrayLength = int(ctx.getChild(3).getText())
-        print("arraylength: ",ArrayLength)
         #数据类型
         ArrayType = self.visit(ctx.getChild(0))
         LLVMArrayType = ir.ArrayType(ArrayType,ArrayLength)
@@ -148,8 +147,49 @@ class myCpp20Visitor(cpp20Visitor):
         ChildCount=ctx.getChildCount()
         if ChildCount > 5:
             #赋初值给数组中的元素
-            ''''''
+            ChildToVisit = 7
+            elementIndex = 0
+            Builder = self.Builders[-1]
+            while(elementIndex<ArrayLength and ChildToVisit<ChildCount):
+                address = Builder.gep(NewVar,[ir.Constant(int32,0),ir.Constant(int32,elementIndex)])
+                valueToStore = self.visit(ctx.getChild(ChildToVisit))['value']
+                Builder.store(valueToStore,address)
+                ChildToVisit += 2
+                elementIndex += 1
         return 
+
+    def visitStringDecl(self, ctx: cpp20Parser.StringDeclContext):
+        '''
+        对应语法：typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN stringLiteral)
+        '''
+        #数组长度
+        ArrayLength = int(ctx.getChild(3).getText())
+        #数据类型
+        ArrayType = self.visit(ctx.getChild(0))
+        LLVMArrayType = ir.ArrayType(ArrayType,ArrayLength)
+        #数据标识符
+        ArrayName = ctx.getChild(1).getText()
+        #变量的声明
+        if(self.symbolTable.current_scope_level == 0):
+            NewVar=ir.GlobalVariable(self.Module,LLVMArrayType,name = ArrayName)
+        else:
+            Builder=self.Builders[-1]
+            NewVar=Builder.alloca(LLVMArrayType,name = ArrayName)
+
+        symbolProperty = NameProperty(LLVMArrayType,NewVar)
+        self.symbolTable.addLocal(ArrayName,symbolProperty)
+        ChildCount=ctx.getChildCount()
+        if ChildCount>5:
+            stringLiteral = ctx.getChild(6)
+            ScharNum = stringLiteral.getChildCount()
+            elementIndex = 1
+            while(elementIndex < ScharNum-1):
+                charNum = stringLiteral.getChild(elementIndex)
+                CharToStore = ir.Constant(ArrayType,charNum)
+                address = Builder.gep(NewVar,[ir.Constant(int32,0),ir.Constant(int32,elementIndex)])
+                Builder.store(CharToStore,address)
+                elementIndex += 1
+        return
 
     def visitReturnStatement(self, ctx: cpp20Parser.ReturnStatementContext):
         '''
@@ -162,7 +202,6 @@ class myCpp20Visitor(cpp20Visitor):
 
     def visitFunctionParameter(self, ctx: cpp20Parser.FunctionParameterContext):
         '''
-        
             对应语法：typeSpecifier Identifier;
         '''
         return {

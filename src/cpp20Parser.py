@@ -1,4 +1,4 @@
-# Generated from grammar/cpp20Parser.g4 by ANTLR 4.9.3
+# Generated from grammar/cpp20Parser.g4 by ANTLR 4.9
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -12,7 +12,11 @@ else:
 def serializedATN():
     with StringIO() as buf:
         buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\u0090")
+<<<<<<< Updated upstream
         buf.write("\u01ef\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+=======
+        buf.write("\u01f4\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+>>>>>>> Stashed changes
         buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
         buf.write("\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23\t\23")
         buf.write("\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31")
@@ -52,6 +56,7 @@ def serializedATN():
         buf.write("\13\34\3\35\3\35\5\35\u0188\n\35\3\35\3\35\3\36\3\36\3")
         buf.write("\36\3\37\3\37\3\37\3 \3 \3 \3 \5 \u0196\n \3!\3!\3!\3")
         buf.write("!\3!\3!\3!\3!\3!\3!\7!\u01a2\n!\f!\16!\u01a5\13!\3!\3")
+<<<<<<< Updated upstream
         buf.write("!\5!\u01a9\n!\3\"\3\"\3\"\3\"\3\"\3\"\3\"\5\"\u01b2\n")
         buf.write("\"\3#\3#\3#\3#\7#\u01b8\n#\f#\16#\u01bb\13#\3#\3#\3$\3")
         buf.write("$\3$\3$\3$\3$\7$\u01c5\n$\f$\16$\u01c8\13$\5$\u01ca\n")
@@ -164,6 +169,121 @@ def serializedATN():
         buf.write("\u012b\u0122\3\2\2\2\u012b\u0123\3\2\2\2\u012b\u0124\3")
         buf.write("\2\2\2\u012b\u0125\3\2\2\2\u012b\u0126\3\2\2\2\u012b\u0128")
         buf.write("\3\2\2\2\u012c%\3\2\2\2\u012d\u0131\7\7\2\2\u012e\u0130")
+=======
+        buf.write("!\5!\u01a9\n!\3!\3!\3!\3!\3!\3!\3!\5!\u01b2\n!\5!\u01b4")
+        buf.write("\n!\3\"\3\"\3\"\3\"\5\"\u01ba\n\"\3#\3#\3#\3#\7#\u01c0")
+        buf.write("\n#\f#\16#\u01c3\13#\3#\3#\3$\3$\3$\3$\3$\3$\7$\u01cd")
+        buf.write("\n$\f$\16$\u01d0\13$\5$\u01d2\n$\3$\3$\3$\3%\3%\3%\3&")
+        buf.write("\3&\3&\3&\3&\5&\u01df\n&\3\'\3\'\3\'\3\'\3\'\5\'\u01e6")
+        buf.write("\n\'\3(\3(\3(\3(\5(\u01ec\n(\3)\3)\3*\3*\3+\3+\3+\2\3")
+        buf.write("\",\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60")
+        buf.write("\62\64\668:<>@BDFHJLNPRT\2\4\3\2]_\4\288jj\2\u0221\2Z")
+        buf.write("\3\2\2\2\4\\\3\2\2\2\6^\3\2\2\2\bc\3\2\2\2\nj\3\2\2\2")
+        buf.write("\fx\3\2\2\2\16~\3\2\2\2\20\u008c\3\2\2\2\22\u008e\3\2")
+        buf.write("\2\2\24\u0093\3\2\2\2\26\u0095\3\2\2\2\30\u00a8\3\2\2")
+        buf.write("\2\32\u00b4\3\2\2\2\34\u00b7\3\2\2\2\36\u00c2\3\2\2\2")
+        buf.write(" \u00c9\3\2\2\2\"\u00df\3\2\2\2$\u012b\3\2\2\2&\u012d")
+        buf.write("\3\2\2\2(\u0136\3\2\2\2*\u0144\3\2\2\2,\u014d\3\2\2\2")
+        buf.write(".\u0152\3\2\2\2\60\u015f\3\2\2\2\62\u0165\3\2\2\2\64\u016d")
+        buf.write("\3\2\2\2\66\u017d\3\2\2\28\u0185\3\2\2\2:\u018b\3\2\2")
+        buf.write("\2<\u018e\3\2\2\2>\u0195\3\2\2\2@\u01b3\3\2\2\2B\u01b9")
+        buf.write("\3\2\2\2D\u01bb\3\2\2\2F\u01c6\3\2\2\2H\u01d6\3\2\2\2")
+        buf.write("J\u01de\3\2\2\2L\u01e5\3\2\2\2N\u01eb\3\2\2\2P\u01ed\3")
+        buf.write("\2\2\2R\u01ef\3\2\2\2T\u01f1\3\2\2\2V[\5\4\3\2W[\5\6\4")
+        buf.write("\2X[\5\b\5\2Y[\5\n\6\2ZV\3\2\2\2ZW\3\2\2\2ZX\3\2\2\2Z")
+        buf.write("Y\3\2\2\2[\3\3\2\2\2\\]\7\u0086\2\2]\5\3\2\2\2^`\7\u0085")
+        buf.write("\2\2_a\7\u0083\2\2`_\3\2\2\2`a\3\2\2\2a\7\3\2\2\2bd\7")
+        buf.write("\u0089\2\2cb\3\2\2\2cd\3\2\2\2de\3\2\2\2ef\7\6\2\2fg\7")
+        buf.write("\u008a\2\2gh\7\6\2\2h\t\3\2\2\2ik\7\u0089\2\2ji\3\2\2")
+        buf.write("\2jk\3\2\2\2kl\3\2\2\2lp\7\5\2\2mo\7\u0090\2\2nm\3\2\2")
+        buf.write("\2or\3\2\2\2pn\3\2\2\2pq\3\2\2\2qs\3\2\2\2rp\3\2\2\2s")
+        buf.write("t\7\5\2\2t\13\3\2\2\2uw\5> \2vu\3\2\2\2wz\3\2\2\2xv\3")
+        buf.write("\2\2\2xy\3\2\2\2y{\3\2\2\2zx\3\2\2\2{|\7\2\2\3|\r\3\2")
+        buf.write("\2\2}\177\5\20\t\2~}\3\2\2\2~\177\3\2\2\2\177\u0080\3")
+        buf.write("\2\2\2\u0080\u0081\7\u0084\2\2\u0081\u0089\3\2\2\2\u0082")
+        buf.write("\u0084\7\16\2\2\u0083\u0085\5\20\t\2\u0084\u0083\3\2\2")
+        buf.write("\2\u0084\u0085\3\2\2\2\u0085\u0086\3\2\2\2\u0086\u0088")
+        buf.write("\7\u0084\2\2\u0087\u0082\3\2\2\2\u0088\u008b\3\2\2\2\u0089")
+        buf.write("\u0087\3\2\2\2\u0089\u008a\3\2\2\2\u008a\17\3\2\2\2\u008b")
+        buf.write("\u0089\3\2\2\2\u008c\u008d\t\2\2\2\u008d\21\3\2\2\2\u008e")
+        buf.write("\u008f\5\20\t\2\u008f\u0090\7\21\2\2\u0090\23\3\2\2\2")
+        buf.write("\u0091\u0094\5F$\2\u0092\u0094\5D#\2\u0093\u0091\3\2\2")
+        buf.write("\2\u0093\u0092\3\2\2\2\u0094\25\3\2\2\2\u0095\u0096\7")
+        buf.write("\u0084\2\2\u0096\u009f\7\13\2\2\u0097\u009c\5H%\2\u0098")
+        buf.write("\u0099\7\16\2\2\u0099\u009b\5H%\2\u009a\u0098\3\2\2\2")
+        buf.write("\u009b\u009e\3\2\2\2\u009c\u009a\3\2\2\2\u009c\u009d\3")
+        buf.write("\2\2\2\u009d\u00a0\3\2\2\2\u009e\u009c\3\2\2\2\u009f\u0097")
+        buf.write("\3\2\2\2\u009f\u00a0\3\2\2\2\u00a0\u00a1\3\2\2\2\u00a1")
+        buf.write("\u00a4\7\f\2\2\u00a2\u00a3\7\21\2\2\u00a3\u00a5\5(\25")
+        buf.write("\2\u00a4\u00a2\3\2\2\2\u00a4\u00a5\3\2\2\2\u00a5\u00a6")
+        buf.write("\3\2\2\2\u00a6\u00a7\5&\24\2\u00a7\27\3\2\2\2\u00a8\u00a9")
+        buf.write("\79\2\2\u00a9\u00aa\7\u0084\2\2\u00aa\u00ab\7\13\2\2\u00ab")
+        buf.write("\u00ac\7\f\2\2\u00ac\u00ad\5&\24\2\u00ad\31\3\2\2\2\u00ae")
+        buf.write("\u00b3\5\22\n\2\u00af\u00b3\5\24\13\2\u00b0\u00b3\5\26")
+        buf.write("\f\2\u00b1\u00b3\5\30\r\2\u00b2\u00ae\3\2\2\2\u00b2\u00af")
+        buf.write("\3\2\2\2\u00b2\u00b0\3\2\2\2\u00b2\u00b1\3\2\2\2\u00b3")
+        buf.write("\u00b6\3\2\2\2\u00b4\u00b2\3\2\2\2\u00b4\u00b5\3\2\2\2")
+        buf.write("\u00b5\33\3\2\2\2\u00b6\u00b4\3\2\2\2\u00b7\u00b8\t\3")
+        buf.write("\2\2\u00b8\u00bb\7\u0084\2\2\u00b9\u00ba\7\21\2\2\u00ba")
+        buf.write("\u00bc\5\16\b\2\u00bb\u00b9\3\2\2\2\u00bb\u00bc\3\2\2")
+        buf.write("\2\u00bc\u00bd\3\2\2\2\u00bd\u00be\7\7\2\2\u00be\u00bf")
+        buf.write("\5\32\16\2\u00bf\u00c0\7\b\2\2\u00c0\u00c1\7\17\2\2\u00c1")
+        buf.write("\35\3\2\2\2\u00c2\u00c3\5\2\2\2\u00c3\37\3\2\2\2\u00c4")
+        buf.write("\u00ca\7\u0084\2\2\u00c5\u00c6\7\u0084\2\2\u00c6\u00c7")
+        buf.write("\7\t\2\2\u00c7\u00c8\7\u0085\2\2\u00c8\u00ca\7\n\2\2\u00c9")
+        buf.write("\u00c4\3\2\2\2\u00c9\u00c5\3\2\2\2\u00ca!\3\2\2\2\u00cb")
+        buf.write("\u00cc\b\22\1\2\u00cc\u00e0\5(\25\2\u00cd\u00e0\5\2\2")
+        buf.write("\2\u00ce\u00e0\7\u0084\2\2\u00cf\u00d0\7\13\2\2\u00d0")
+        buf.write("\u00d1\5\"\22\2\u00d1\u00d2\7\f\2\2\u00d2\u00e0\3\2\2")
+        buf.write("\2\u00d3\u00d4\7W\2\2\u00d4\u00e0\5\"\22\30\u00d5\u00d6")
+        buf.write("\7\25\2\2\u00d6\u00e0\5\"\22\27\u00d7\u00d8\7\u0084\2")
+        buf.write("\2\u00d8\u00d9\7\t\2\2\u00d9\u00da\7\u0085\2\2\u00da\u00e0")
+        buf.write("\7\n\2\2\u00db\u00dc\5 \21\2\u00dc\u00dd\7\22\2\2\u00dd")
+        buf.write("\u00de\5\"\22\3\u00de\u00e0\3\2\2\2\u00df\u00cb\3\2\2")
+        buf.write("\2\u00df\u00cd\3\2\2\2\u00df\u00ce\3\2\2\2\u00df\u00cf")
+        buf.write("\3\2\2\2\u00df\u00d3\3\2\2\2\u00df\u00d5\3\2\2\2\u00df")
+        buf.write("\u00d7\3\2\2\2\u00df\u00db\3\2\2\2\u00e0\u0119\3\2\2\2")
+        buf.write("\u00e1\u00e2\f\26\2\2\u00e2\u00e3\7\27\2\2\u00e3\u0118")
+        buf.write("\5\"\22\27\u00e4\u00e5\f\25\2\2\u00e5\u00e6\7\31\2\2\u00e6")
+        buf.write("\u0118\5\"\22\26\u00e7\u00e8\f\24\2\2\u00e8\u00e9\7\33")
+        buf.write("\2\2\u00e9\u0118\5\"\22\25\u00ea\u00eb\f\23\2\2\u00eb")
+        buf.write("\u00ec\7\23\2\2\u00ec\u0118\5\"\22\24\u00ed\u00ee\f\22")
+        buf.write("\2\2\u00ee\u00ef\7\25\2\2\u00ef\u0118\5\"\22\23\u00f0")
+        buf.write("\u00f1\f\21\2\2\u00f1\u00f2\7/\2\2\u00f2\u0118\5\"\22")
+        buf.write("\22\u00f3\u00f4\f\20\2\2\u00f4\u00f5\7.\2\2\u00f5\u0118")
+        buf.write("\5\"\22\21\u00f6\u00f7\f\17\2\2\u00f7\u00f8\7}\2\2\u00f8")
+        buf.write("\u0118\5\"\22\20\u00f9\u00fa\f\16\2\2\u00fa\u00fb\7[\2")
+        buf.write("\2\u00fb\u0118\5\"\22\17\u00fc\u00fd\f\r\2\2\u00fd\u00fe")
+        buf.write("\7*\2\2\u00fe\u0118\5\"\22\16\u00ff\u0100\f\f\2\2\u0100")
+        buf.write("\u0101\7\35\2\2\u0101\u0118\5\"\22\r\u0102\u0103\f\13")
+        buf.write("\2\2\u0103\u0104\7\37\2\2\u0104\u0118\5\"\22\f\u0105\u0106")
+        buf.write("\f\n\2\2\u0106\u0107\7\3\2\2\u0107\u0118\5\"\22\13\u0108")
+        buf.write("\u0109\f\t\2\2\u0109\u010a\7\4\2\2\u010a\u0118\5\"\22")
+        buf.write("\n\u010b\u010c\f\b\2\2\u010c\u010d\7$\2\2\u010d\u0118")
+        buf.write("\5\"\22\t\u010e\u010f\f\7\2\2\u010f\u0110\7%\2\2\u0110")
+        buf.write("\u0118\5\"\22\b\u0111\u0112\f\6\2\2\u0112\u0113\7!\2\2")
+        buf.write("\u0113\u0118\5\"\22\7\u0114\u0115\f\5\2\2\u0115\u0116")
+        buf.write("\7X\2\2\u0116\u0118\5\"\22\6\u0117\u00e1\3\2\2\2\u0117")
+        buf.write("\u00e4\3\2\2\2\u0117\u00e7\3\2\2\2\u0117\u00ea\3\2\2\2")
+        buf.write("\u0117\u00ed\3\2\2\2\u0117\u00f0\3\2\2\2\u0117\u00f3\3")
+        buf.write("\2\2\2\u0117\u00f6\3\2\2\2\u0117\u00f9\3\2\2\2\u0117\u00fc")
+        buf.write("\3\2\2\2\u0117\u00ff\3\2\2\2\u0117\u0102\3\2\2\2\u0117")
+        buf.write("\u0105\3\2\2\2\u0117\u0108\3\2\2\2\u0117\u010b\3\2\2\2")
+        buf.write("\u0117\u010e\3\2\2\2\u0117\u0111\3\2\2\2\u0117\u0114\3")
+        buf.write("\2\2\2\u0118\u011b\3\2\2\2\u0119\u0117\3\2\2\2\u0119\u011a")
+        buf.write("\3\2\2\2\u011a#\3\2\2\2\u011b\u0119\3\2\2\2\u011c\u012c")
+        buf.write("\5*\26\2\u011d\u012c\5.\30\2\u011e\u012c\5\60\31\2\u011f")
+        buf.write("\u012c\5\62\32\2\u0120\u012c\5\64\33\2\u0121\u012c\58")
+        buf.write("\35\2\u0122\u012c\5:\36\2\u0123\u012c\5<\37\2\u0124\u012c")
+        buf.write("\5&\24\2\u0125\u012c\5D#\2\u0126\u012c\5@!\2\u0127\u0129")
+        buf.write("\5\"\22\2\u0128\u0127\3\2\2\2\u0128\u0129\3\2\2\2\u0129")
+        buf.write("\u012a\3\2\2\2\u012a\u012c\7\17\2\2\u012b\u011c\3\2\2")
+        buf.write("\2\u012b\u011d\3\2\2\2\u012b\u011e\3\2\2\2\u012b\u011f")
+        buf.write("\3\2\2\2\u012b\u0120\3\2\2\2\u012b\u0121\3\2\2\2\u012b")
+        buf.write("\u0122\3\2\2\2\u012b\u0123\3\2\2\2\u012b\u0124\3\2\2\2")
+        buf.write("\u012b\u0125\3\2\2\2\u012b\u0126\3\2\2\2\u012b\u0128\3")
+        buf.write("\2\2\2\u012c%\3\2\2\2\u012d\u0131\7\7\2\2\u012e\u0130")
+>>>>>>> Stashed changes
         buf.write("\5$\23\2\u012f\u012e\3\2\2\2\u0130\u0133\3\2\2\2\u0131")
         buf.write("\u012f\3\2\2\2\u0131\u0132\3\2\2\2\u0132\u0134\3\2\2\2")
         buf.write("\u0133\u0131\3\2\2\2\u0134\u0135\7\b\2\2\u0135\'\3\2\2")
@@ -213,6 +333,7 @@ def serializedATN():
         buf.write("\5\"\22\2\u01a1\u019f\3\2\2\2\u01a2\u01a5\3\2\2\2\u01a3")
         buf.write("\u01a1\3\2\2\2\u01a3\u01a4\3\2\2\2\u01a4\u01a6\3\2\2\2")
         buf.write("\u01a5\u01a3\3\2\2\2\u01a6\u01a7\7\b\2\2\u01a7\u01a9\3")
+<<<<<<< Updated upstream
         buf.write("\2\2\2\u01a8\u019c\3\2\2\2\u01a8\u01a9\3\2\2\2\u01a9A")
         buf.write("\3\2\2\2\u01aa\u01b2\7\u0084\2\2\u01ab\u01ac\7\u0084\2")
         buf.write("\2\u01ac\u01ad\7\22\2\2\u01ad\u01b2\5\36\20\2\u01ae\u01af")
@@ -248,6 +369,45 @@ def serializedATN():
         buf.write("\u0117\u0119\u0128\u012b\u0131\u013d\u0140\u014b\u015a")
         buf.write("\u0170\u0174\u0178\u0182\u0187\u0195\u01a3\u01a8\u01b1")
         buf.write("\u01b9\u01c6\u01c9\u01d2\u01d9\u01e0\u01e6")
+=======
+        buf.write("\2\2\2\u01a8\u019c\3\2\2\2\u01a8\u01a9\3\2\2\2\u01a9\u01b4")
+        buf.write("\3\2\2\2\u01aa\u01ab\5R*\2\u01ab\u01ac\7\u0084\2\2\u01ac")
+        buf.write("\u01ad\7\t\2\2\u01ad\u01ae\7\u0085\2\2\u01ae\u01b1\7\n")
+        buf.write("\2\2\u01af\u01b0\7\22\2\2\u01b0\u01b2\5\n\6\2\u01b1\u01af")
+        buf.write("\3\2\2\2\u01b1\u01b2\3\2\2\2\u01b2\u01b4\3\2\2\2\u01b3")
+        buf.write("\u0197\3\2\2\2\u01b3\u01aa\3\2\2\2\u01b4A\3\2\2\2\u01b5")
+        buf.write("\u01ba\7\u0084\2\2\u01b6\u01b7\7\u0084\2\2\u01b7\u01b8")
+        buf.write("\7\22\2\2\u01b8\u01ba\5\"\22\2\u01b9\u01b5\3\2\2\2\u01b9")
+        buf.write("\u01b6\3\2\2\2\u01baC\3\2\2\2\u01bb\u01bc\5J&\2\u01bc")
+        buf.write("\u01c1\5B\"\2\u01bd\u01be\7\16\2\2\u01be\u01c0\5B\"\2")
+        buf.write("\u01bf\u01bd\3\2\2\2\u01c0\u01c3\3\2\2\2\u01c1\u01bf\3")
+        buf.write("\2\2\2\u01c1\u01c2\3\2\2\2\u01c2\u01c4\3\2\2\2\u01c3\u01c1")
+        buf.write("\3\2\2\2\u01c4\u01c5\7\17\2\2\u01c5E\3\2\2\2\u01c6\u01c7")
+        buf.write("\5J&\2\u01c7\u01c8\7\u0084\2\2\u01c8\u01d1\7\13\2\2\u01c9")
+        buf.write("\u01ce\5H%\2\u01ca\u01cb\7\16\2\2\u01cb\u01cd\5H%\2\u01cc")
+        buf.write("\u01ca\3\2\2\2\u01cd\u01d0\3\2\2\2\u01ce\u01cc\3\2\2\2")
+        buf.write("\u01ce\u01cf\3\2\2\2\u01cf\u01d2\3\2\2\2\u01d0\u01ce\3")
+        buf.write("\2\2\2\u01d1\u01c9\3\2\2\2\u01d1\u01d2\3\2\2\2\u01d2\u01d3")
+        buf.write("\3\2\2\2\u01d3\u01d4\7\f\2\2\u01d4\u01d5\5&\24\2\u01d5")
+        buf.write("G\3\2\2\2\u01d6\u01d7\5J&\2\u01d7\u01d8\7\u0084\2\2\u01d8")
+        buf.write("I\3\2\2\2\u01d9\u01df\5L\'\2\u01da\u01df\5N(\2\u01db\u01df")
+        buf.write("\5P)\2\u01dc\u01df\5R*\2\u01dd\u01df\5T+\2\u01de\u01d9")
+        buf.write("\3\2\2\2\u01de\u01da\3\2\2\2\u01de\u01db\3\2\2\2\u01de")
+        buf.write("\u01dc\3\2\2\2\u01de\u01dd\3\2\2\2\u01dfK\3\2\2\2\u01e0")
+        buf.write("\u01e6\7R\2\2\u01e1\u01e6\7S\2\2\u01e2\u01e6\7d\2\2\u01e3")
+        buf.write("\u01e4\7S\2\2\u01e4\u01e6\7S\2\2\u01e5\u01e0\3\2\2\2\u01e5")
+        buf.write("\u01e1\3\2\2\2\u01e5\u01e2\3\2\2\2\u01e5\u01e3\3\2\2\2")
+        buf.write("\u01e6M\3\2\2\2\u01e7\u01ec\7L\2\2\u01e8\u01ec\7D\2\2")
+        buf.write("\u01e9\u01ea\7S\2\2\u01ea\u01ec\7D\2\2\u01eb\u01e7\3\2")
+        buf.write("\2\2\u01eb\u01e8\3\2\2\2\u01eb\u01e9\3\2\2\2\u01ecO\3")
+        buf.write("\2\2\2\u01ed\u01ee\7\60\2\2\u01eeQ\3\2\2\2\u01ef\u01f0")
+        buf.write("\7\64\2\2\u01f0S\3\2\2\2\u01f1\u01f2\7y\2\2\u01f2U\3\2")
+        buf.write("\2\2.Z`cjpx~\u0084\u0089\u0093\u009c\u009f\u00a4\u00b2")
+        buf.write("\u00b4\u00bb\u00c9\u00df\u0117\u0119\u0128\u012b\u0131")
+        buf.write("\u013d\u0140\u014b\u015a\u0170\u0174\u0178\u0182\u0187")
+        buf.write("\u0195\u01a3\u01a8\u01b1\u01b3\u01b9\u01c1\u01ce\u01d1")
+        buf.write("\u01de\u01e5\u01eb")
+>>>>>>> Stashed changes
         return buf.getvalue()
 
 
@@ -520,7 +680,7 @@ class cpp20Parser ( Parser ):
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.9.3")
+        self.checkVersion("4.9")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
 
@@ -528,7 +688,6 @@ class cpp20Parser ( Parser ):
 
 
     class LiteralsContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -613,7 +772,6 @@ class cpp20Parser ( Parser ):
 
 
     class FloatingLiteralContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -660,7 +818,6 @@ class cpp20Parser ( Parser ):
 
 
     class IntegerLiteralContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -718,7 +875,6 @@ class cpp20Parser ( Parser ):
 
 
     class CharacterLiteralContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -787,7 +943,6 @@ class cpp20Parser ( Parser ):
 
 
     class StringLiteralContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -867,7 +1022,6 @@ class cpp20Parser ( Parser ):
 
 
     class TranslationUnitContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -932,7 +1086,6 @@ class cpp20Parser ( Parser ):
 
 
     class BaseSpecifierListContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1024,7 +1177,6 @@ class cpp20Parser ( Parser ):
 
 
     class AccessSpecifierContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1083,7 +1235,6 @@ class cpp20Parser ( Parser ):
 
 
     class AccessLabelContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1136,7 +1287,6 @@ class cpp20Parser ( Parser ):
 
 
     class MemberDeclarationContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1201,7 +1351,6 @@ class cpp20Parser ( Parser ):
 
 
     class ConstructorDeclarationContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1315,7 +1464,6 @@ class cpp20Parser ( Parser ):
 
 
     class DestructorDeclarationContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1383,7 +1531,6 @@ class cpp20Parser ( Parser ):
 
 
     class MemberSpecificationContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1484,7 +1631,6 @@ class cpp20Parser ( Parser ):
 
 
     class ClassDefinitionContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1583,7 +1729,6 @@ class cpp20Parser ( Parser ):
 
 
     class ConstExpressionContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1631,7 +1776,6 @@ class cpp20Parser ( Parser ):
 
 
     class LeftExpressionContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1707,7 +1851,6 @@ class cpp20Parser ( Parser ):
 
 
     class ExpressionContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2161,7 +2304,6 @@ class cpp20Parser ( Parser ):
 
 
     class StatementContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2338,7 +2480,6 @@ class cpp20Parser ( Parser ):
 
 
     class BlockContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2408,7 +2549,6 @@ class cpp20Parser ( Parser ):
 
 
     class FunctionCallContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2499,7 +2639,6 @@ class cpp20Parser ( Parser ):
 
 
     class IfStatementContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2584,7 +2723,6 @@ class cpp20Parser ( Parser ):
 
 
     class CaseStatementContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2648,7 +2786,6 @@ class cpp20Parser ( Parser ):
 
 
     class SwitchStatementContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2739,7 +2876,6 @@ class cpp20Parser ( Parser ):
 
 
     class WhileStatementContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2808,7 +2944,6 @@ class cpp20Parser ( Parser ):
 
 
     class DoWhileStatementContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2887,7 +3022,6 @@ class cpp20Parser ( Parser ):
 
 
     class ForStatementContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2996,7 +3130,6 @@ class cpp20Parser ( Parser ):
 
 
     class ForExprSetContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3066,7 +3199,6 @@ class cpp20Parser ( Parser ):
 
 
     class ReturnStatementContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3131,7 +3263,6 @@ class cpp20Parser ( Parser ):
 
 
     class BreakStatementContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3183,7 +3314,6 @@ class cpp20Parser ( Parser ):
 
 
     class ContinueStatementContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3235,7 +3365,6 @@ class cpp20Parser ( Parser ):
 
 
     class DeclarationContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3320,67 +3449,107 @@ class cpp20Parser ( Parser ):
 
 
     class ArrayDeclaratorContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
 
+
+        def getRuleIndex(self):
+            return cpp20Parser.RULE_arrayDeclarator
+
+     
+        def copyFrom(self, ctx:ParserRuleContext):
+            super().copyFrom(ctx)
+
+
+
+    class NormalArrDeclContext(ArrayDeclaratorContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a cpp20Parser.ArrayDeclaratorContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
         def typeSpecifier(self):
             return self.getTypedRuleContext(cpp20Parser.TypeSpecifierContext,0)
 
-
         def Identifier(self):
             return self.getToken(cpp20Parser.Identifier, 0)
-
         def LSQUARE(self):
             return self.getToken(cpp20Parser.LSQUARE, 0)
-
         def DecimalLiteral(self):
             return self.getToken(cpp20Parser.DecimalLiteral, 0)
-
         def RSQUARE(self):
             return self.getToken(cpp20Parser.RSQUARE, 0)
-
         def ASSIGN(self):
             return self.getToken(cpp20Parser.ASSIGN, 0)
-
         def LBRACE(self):
             return self.getToken(cpp20Parser.LBRACE, 0)
-
         def expression(self, i:int=None):
             if i is None:
                 return self.getTypedRuleContexts(cpp20Parser.ExpressionContext)
             else:
                 return self.getTypedRuleContext(cpp20Parser.ExpressionContext,i)
 
-
         def RBRACE(self):
             return self.getToken(cpp20Parser.RBRACE, 0)
-
         def COMMA(self, i:int=None):
             if i is None:
                 return self.getTokens(cpp20Parser.COMMA)
             else:
                 return self.getToken(cpp20Parser.COMMA, i)
 
-        def getRuleIndex(self):
-            return cpp20Parser.RULE_arrayDeclarator
-
         def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterArrayDeclarator" ):
-                listener.enterArrayDeclarator(self)
+            if hasattr( listener, "enterNormalArrDecl" ):
+                listener.enterNormalArrDecl(self)
 
         def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitArrayDeclarator" ):
-                listener.exitArrayDeclarator(self)
+            if hasattr( listener, "exitNormalArrDecl" ):
+                listener.exitNormalArrDecl(self)
 
         def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitArrayDeclarator" ):
-                return visitor.visitArrayDeclarator(self)
+            if hasattr( visitor, "visitNormalArrDecl" ):
+                return visitor.visitNormalArrDecl(self)
             else:
                 return visitor.visitChildren(self)
 
+
+    class StringDeclContext(ArrayDeclaratorContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a cpp20Parser.ArrayDeclaratorContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def charTypeSpecifier(self):
+            return self.getTypedRuleContext(cpp20Parser.CharTypeSpecifierContext,0)
+
+        def Identifier(self):
+            return self.getToken(cpp20Parser.Identifier, 0)
+        def LSQUARE(self):
+            return self.getToken(cpp20Parser.LSQUARE, 0)
+        def DecimalLiteral(self):
+            return self.getToken(cpp20Parser.DecimalLiteral, 0)
+        def RSQUARE(self):
+            return self.getToken(cpp20Parser.RSQUARE, 0)
+        def ASSIGN(self):
+            return self.getToken(cpp20Parser.ASSIGN, 0)
+        def stringLiteral(self):
+            return self.getTypedRuleContext(cpp20Parser.StringLiteralContext,0)
+
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterStringDecl" ):
+                listener.enterStringDecl(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitStringDecl" ):
+                listener.exitStringDecl(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitStringDecl" ):
+                return visitor.visitStringDecl(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -3390,41 +3559,74 @@ class cpp20Parser ( Parser ):
         self.enterRule(localctx, 62, self.RULE_arrayDeclarator)
         self._la = 0 # Token type
         try:
-            self.enterOuterAlt(localctx, 1)
-            self.state = 405
-            self.typeSpecifier()
-            self.state = 406
-            self.match(cpp20Parser.Identifier)
-            self.state = 407
-            self.match(cpp20Parser.LSQUARE)
-            self.state = 408
-            self.match(cpp20Parser.DecimalLiteral)
-            self.state = 409
-            self.match(cpp20Parser.RSQUARE)
-            self.state = 422
+            self.state = 433
             self._errHandler.sync(self)
-            _la = self._input.LA(1)
-            if _la==cpp20Parser.ASSIGN:
-                self.state = 410
-                self.match(cpp20Parser.ASSIGN)
-                self.state = 411
-                self.match(cpp20Parser.LBRACE)
-                self.state = 412
-                self.expression(0)
-                self.state = 417
+            la_ = self._interp.adaptivePredict(self._input,36,self._ctx)
+            if la_ == 1:
+                localctx = cpp20Parser.NormalArrDeclContext(self, localctx)
+                self.enterOuterAlt(localctx, 1)
+                self.state = 405
+                self.typeSpecifier()
+                self.state = 406
+                self.match(cpp20Parser.Identifier)
+                self.state = 407
+                self.match(cpp20Parser.LSQUARE)
+                self.state = 408
+                self.match(cpp20Parser.DecimalLiteral)
+                self.state = 409
+                self.match(cpp20Parser.RSQUARE)
+                self.state = 422
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==cpp20Parser.COMMA:
-                    self.state = 413
-                    self.match(cpp20Parser.COMMA)
-                    self.state = 414
+                if _la==cpp20Parser.ASSIGN:
+                    self.state = 410
+                    self.match(cpp20Parser.ASSIGN)
+                    self.state = 411
+                    self.match(cpp20Parser.LBRACE)
+                    self.state = 412
                     self.expression(0)
-                    self.state = 419
+                    self.state = 417
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
+                    while _la==cpp20Parser.COMMA:
+                        self.state = 413
+                        self.match(cpp20Parser.COMMA)
+                        self.state = 414
+                        self.expression(0)
+                        self.state = 419
+                        self._errHandler.sync(self)
+                        _la = self._input.LA(1)
 
-                self.state = 420
-                self.match(cpp20Parser.RBRACE)
+                    self.state = 420
+                    self.match(cpp20Parser.RBRACE)
+
+
+                pass
+
+            elif la_ == 2:
+                localctx = cpp20Parser.StringDeclContext(self, localctx)
+                self.enterOuterAlt(localctx, 2)
+                self.state = 424
+                self.charTypeSpecifier()
+                self.state = 425
+                self.match(cpp20Parser.Identifier)
+                self.state = 426
+                self.match(cpp20Parser.LSQUARE)
+                self.state = 427
+                self.match(cpp20Parser.DecimalLiteral)
+                self.state = 428
+                self.match(cpp20Parser.RSQUARE)
+                self.state = 431
+                self._errHandler.sync(self)
+                _la = self._input.LA(1)
+                if _la==cpp20Parser.ASSIGN:
+                    self.state = 429
+                    self.match(cpp20Parser.ASSIGN)
+                    self.state = 430
+                    self.stringLiteral()
+
+
+                pass
 
 
         except RecognitionException as re:
@@ -3437,7 +3639,6 @@ class cpp20Parser ( Parser ):
 
 
     class VariableDeclarationContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3541,23 +3742,28 @@ class cpp20Parser ( Parser ):
         localctx = cpp20Parser.VariableDeclarationContext(self, self._ctx, self.state)
         self.enterRule(localctx, 64, self.RULE_variableDeclaration)
         try:
+<<<<<<< Updated upstream
             self.state = 431
+=======
+            self.state = 439
+>>>>>>> Stashed changes
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,35,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input,37,self._ctx)
             if la_ == 1:
                 localctx = cpp20Parser.VarDeclWithoutInitContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 424
+                self.state = 435
                 self.match(cpp20Parser.Identifier)
                 pass
 
             elif la_ == 2:
                 localctx = cpp20Parser.VarDeclWithConstInitContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 425
+                self.state = 436
                 self.match(cpp20Parser.Identifier)
-                self.state = 426
+                self.state = 437
                 self.match(cpp20Parser.ASSIGN)
+<<<<<<< Updated upstream
                 self.state = 427
                 self.constExpression()
                 pass
@@ -3570,6 +3776,9 @@ class cpp20Parser ( Parser ):
                 self.state = 429
                 self.match(cpp20Parser.ASSIGN)
                 self.state = 430
+=======
+                self.state = 438
+>>>>>>> Stashed changes
                 self.expression(0)
                 pass
 
@@ -3584,7 +3793,6 @@ class cpp20Parser ( Parser ):
 
 
     class VariableDeclaratorContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3637,6 +3845,7 @@ class cpp20Parser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
+<<<<<<< Updated upstream
             self.state = 433
             self.typeSpecifier()
             self.state = 434
@@ -3654,6 +3863,25 @@ class cpp20Parser ( Parser ):
                 _la = self._input.LA(1)
 
             self.state = 442
+=======
+            self.state = 441
+            self.typeSpecifier()
+            self.state = 442
+            self.variableDeclaration()
+            self.state = 447
+            self._errHandler.sync(self)
+            _la = self._input.LA(1)
+            while _la==cpp20Parser.COMMA:
+                self.state = 443
+                self.match(cpp20Parser.COMMA)
+                self.state = 444
+                self.variableDeclaration()
+                self.state = 449
+                self._errHandler.sync(self)
+                _la = self._input.LA(1)
+
+            self.state = 450
+>>>>>>> Stashed changes
             self.match(cpp20Parser.SEMI)
         except RecognitionException as re:
             localctx.exception = re
@@ -3665,7 +3893,6 @@ class cpp20Parser ( Parser ):
 
 
     class FunctionDeclarationContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3728,6 +3955,7 @@ class cpp20Parser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
+<<<<<<< Updated upstream
             self.state = 444
             self.typeSpecifier()
             self.state = 445
@@ -3749,14 +3977,43 @@ class cpp20Parser ( Parser ):
                     self.state = 449
                     self.functionParameter()
                     self.state = 454
+=======
+            self.state = 452
+            self.typeSpecifier()
+            self.state = 453
+            self.match(cpp20Parser.Identifier)
+            self.state = 454
+            self.match(cpp20Parser.LPAREN)
+            self.state = 463
+            self._errHandler.sync(self)
+            _la = self._input.LA(1)
+            if _la==cpp20Parser.BOOL or _la==cpp20Parser.CHAR or ((((_la - 66)) & ~0x3f) == 0 and ((1 << (_la - 66)) & ((1 << (cpp20Parser.DOUBLE - 66)) | (1 << (cpp20Parser.FLOAT - 66)) | (1 << (cpp20Parser.INT - 66)) | (1 << (cpp20Parser.LONG - 66)) | (1 << (cpp20Parser.SHORT - 66)) | (1 << (cpp20Parser.VOID - 66)))) != 0):
+                self.state = 455
+                self.functionParameter()
+                self.state = 460
+                self._errHandler.sync(self)
+                _la = self._input.LA(1)
+                while _la==cpp20Parser.COMMA:
+                    self.state = 456
+                    self.match(cpp20Parser.COMMA)
+                    self.state = 457
+                    self.functionParameter()
+                    self.state = 462
+>>>>>>> Stashed changes
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
 
 
 
+<<<<<<< Updated upstream
             self.state = 457
             self.match(cpp20Parser.RPAREN)
             self.state = 458
+=======
+            self.state = 465
+            self.match(cpp20Parser.RPAREN)
+            self.state = 466
+>>>>>>> Stashed changes
             self.block()
         except RecognitionException as re:
             localctx.exception = re
@@ -3768,7 +4025,6 @@ class cpp20Parser ( Parser ):
 
 
     class FunctionParameterContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3809,6 +4065,7 @@ class cpp20Parser ( Parser ):
         localctx = cpp20Parser.FunctionParameterContext(self, self._ctx, self.state)
         self.enterRule(localctx, 70, self.RULE_functionParameter)
         try:
+<<<<<<< Updated upstream
             self.state = 464
             self._errHandler.sync(self)
             token = self._input.LA(1)
@@ -3827,6 +4084,13 @@ class cpp20Parser ( Parser ):
             else:
                 raise NoViableAltException(self)
 
+=======
+            self.enterOuterAlt(localctx, 1)
+            self.state = 468
+            self.typeSpecifier()
+            self.state = 469
+            self.match(cpp20Parser.Identifier)
+>>>>>>> Stashed changes
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -3837,7 +4101,6 @@ class cpp20Parser ( Parser ):
 
 
     class TypeSpecifierContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3888,36 +4151,61 @@ class cpp20Parser ( Parser ):
         localctx = cpp20Parser.TypeSpecifierContext(self, self._ctx, self.state)
         self.enterRule(localctx, 72, self.RULE_typeSpecifier)
         try:
+<<<<<<< Updated upstream
             self.state = 471
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,40,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 466
+=======
+            self.state = 476
+            self._errHandler.sync(self)
+            la_ = self._interp.adaptivePredict(self._input,41,self._ctx)
+            if la_ == 1:
+                self.enterOuterAlt(localctx, 1)
+                self.state = 471
+>>>>>>> Stashed changes
                 self.integerTypeSpecifier()
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
+<<<<<<< Updated upstream
                 self.state = 467
+=======
+                self.state = 472
+>>>>>>> Stashed changes
                 self.realTypeSpecifier()
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
+<<<<<<< Updated upstream
                 self.state = 468
+=======
+                self.state = 473
+>>>>>>> Stashed changes
                 self.booleanTypeSpecifier()
                 pass
 
             elif la_ == 4:
                 self.enterOuterAlt(localctx, 4)
+<<<<<<< Updated upstream
                 self.state = 469
+=======
+                self.state = 474
+>>>>>>> Stashed changes
                 self.charTypeSpecifier()
                 pass
 
             elif la_ == 5:
                 self.enterOuterAlt(localctx, 5)
+<<<<<<< Updated upstream
                 self.state = 470
+=======
+                self.state = 475
+>>>>>>> Stashed changes
                 self.voidTypeSpecifier()
                 pass
 
@@ -3932,7 +4220,6 @@ class cpp20Parser ( Parser ):
 
 
     class IntegerTypeSpecifierContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3975,32 +4262,55 @@ class cpp20Parser ( Parser ):
         localctx = cpp20Parser.IntegerTypeSpecifierContext(self, self._ctx, self.state)
         self.enterRule(localctx, 74, self.RULE_integerTypeSpecifier)
         try:
+<<<<<<< Updated upstream
             self.state = 478
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,41,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 473
+=======
+            self.state = 483
+            self._errHandler.sync(self)
+            la_ = self._interp.adaptivePredict(self._input,42,self._ctx)
+            if la_ == 1:
+                self.enterOuterAlt(localctx, 1)
+                self.state = 478
+>>>>>>> Stashed changes
                 self.match(cpp20Parser.INT)
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
+<<<<<<< Updated upstream
                 self.state = 474
+=======
+                self.state = 479
+>>>>>>> Stashed changes
                 self.match(cpp20Parser.LONG)
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
+<<<<<<< Updated upstream
                 self.state = 475
+=======
+                self.state = 480
+>>>>>>> Stashed changes
                 self.match(cpp20Parser.SHORT)
                 pass
 
             elif la_ == 4:
                 self.enterOuterAlt(localctx, 4)
+<<<<<<< Updated upstream
                 self.state = 476
                 self.match(cpp20Parser.LONG)
                 self.state = 477
+=======
+                self.state = 481
+                self.match(cpp20Parser.LONG)
+                self.state = 482
+>>>>>>> Stashed changes
                 self.match(cpp20Parser.LONG)
                 pass
 
@@ -4015,7 +4325,6 @@ class cpp20Parser ( Parser ):
 
 
     class RealTypeSpecifierContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4055,24 +4364,42 @@ class cpp20Parser ( Parser ):
         localctx = cpp20Parser.RealTypeSpecifierContext(self, self._ctx, self.state)
         self.enterRule(localctx, 76, self.RULE_realTypeSpecifier)
         try:
+<<<<<<< Updated upstream
             self.state = 484
+=======
+            self.state = 489
+>>>>>>> Stashed changes
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [cpp20Parser.FLOAT]:
                 self.enterOuterAlt(localctx, 1)
+<<<<<<< Updated upstream
                 self.state = 480
+=======
+                self.state = 485
+>>>>>>> Stashed changes
                 self.match(cpp20Parser.FLOAT)
                 pass
             elif token in [cpp20Parser.DOUBLE]:
                 self.enterOuterAlt(localctx, 2)
+<<<<<<< Updated upstream
                 self.state = 481
+=======
+                self.state = 486
+>>>>>>> Stashed changes
                 self.match(cpp20Parser.DOUBLE)
                 pass
             elif token in [cpp20Parser.LONG]:
                 self.enterOuterAlt(localctx, 3)
+<<<<<<< Updated upstream
                 self.state = 482
                 self.match(cpp20Parser.LONG)
                 self.state = 483
+=======
+                self.state = 487
+                self.match(cpp20Parser.LONG)
+                self.state = 488
+>>>>>>> Stashed changes
                 self.match(cpp20Parser.DOUBLE)
                 pass
             else:
@@ -4088,7 +4415,6 @@ class cpp20Parser ( Parser ):
 
 
     class BooleanTypeSpecifierContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4123,7 +4449,11 @@ class cpp20Parser ( Parser ):
         self.enterRule(localctx, 78, self.RULE_booleanTypeSpecifier)
         try:
             self.enterOuterAlt(localctx, 1)
+<<<<<<< Updated upstream
             self.state = 486
+=======
+            self.state = 491
+>>>>>>> Stashed changes
             self.match(cpp20Parser.BOOL)
         except RecognitionException as re:
             localctx.exception = re
@@ -4135,7 +4465,6 @@ class cpp20Parser ( Parser ):
 
 
     class CharTypeSpecifierContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4170,7 +4499,11 @@ class cpp20Parser ( Parser ):
         self.enterRule(localctx, 80, self.RULE_charTypeSpecifier)
         try:
             self.enterOuterAlt(localctx, 1)
+<<<<<<< Updated upstream
             self.state = 488
+=======
+            self.state = 493
+>>>>>>> Stashed changes
             self.match(cpp20Parser.CHAR)
         except RecognitionException as re:
             localctx.exception = re
@@ -4182,7 +4515,6 @@ class cpp20Parser ( Parser ):
 
 
     class VoidTypeSpecifierContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4217,7 +4549,11 @@ class cpp20Parser ( Parser ):
         self.enterRule(localctx, 82, self.RULE_voidTypeSpecifier)
         try:
             self.enterOuterAlt(localctx, 1)
+<<<<<<< Updated upstream
             self.state = 490
+=======
+            self.state = 495
+>>>>>>> Stashed changes
             self.match(cpp20Parser.VOID)
         except RecognitionException as re:
             localctx.exception = re

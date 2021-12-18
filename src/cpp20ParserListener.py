@@ -1,4 +1,4 @@
-# Generated from grammar/cpp20Parser.g4 by ANTLR 4.9.3
+# Generated from grammar/cpp20Parser.g4 by ANTLR 4.9
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .cpp20Parser import cpp20Parser
@@ -287,12 +287,21 @@ class cpp20ParserListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by cpp20Parser#arrayDeclarator.
-    def enterArrayDeclarator(self, ctx:cpp20Parser.ArrayDeclaratorContext):
+    # Enter a parse tree produced by cpp20Parser#normalArrDecl.
+    def enterNormalArrDecl(self, ctx:cpp20Parser.NormalArrDeclContext):
         pass
 
-    # Exit a parse tree produced by cpp20Parser#arrayDeclarator.
-    def exitArrayDeclarator(self, ctx:cpp20Parser.ArrayDeclaratorContext):
+    # Exit a parse tree produced by cpp20Parser#normalArrDecl.
+    def exitNormalArrDecl(self, ctx:cpp20Parser.NormalArrDeclContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#stringDecl.
+    def enterStringDecl(self, ctx:cpp20Parser.StringDeclContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#stringDecl.
+    def exitStringDecl(self, ctx:cpp20Parser.StringDeclContext):
         pass
 
 

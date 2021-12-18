@@ -134,7 +134,9 @@ declaration :
     | classDefinition;
 
 arrayDeclarator : 
-    typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN LBRACE expression (COMMA expression)* RBRACE)?;
+    typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN LBRACE expression (COMMA expression)* RBRACE)? #normalArrDecl
+    | charTypeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN stringLiteral)? #stringDecl
+    ;
 
 // with global variable in line 2
 variableDeclaration: Identifier  #varDeclWithoutInit

@@ -1,4 +1,4 @@
-# Generated from grammar/cpp20Parser.g4 by ANTLR 4.9.3
+# Generated from grammar/cpp20Parser.g4 by ANTLR 4.9
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .cpp20Parser import cpp20Parser
@@ -164,8 +164,13 @@ class cpp20ParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by cpp20Parser#arrayDeclarator.
-    def visitArrayDeclarator(self, ctx:cpp20Parser.ArrayDeclaratorContext):
+    # Visit a parse tree produced by cpp20Parser#normalArrDecl.
+    def visitNormalArrDecl(self, ctx:cpp20Parser.NormalArrDeclContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by cpp20Parser#stringDecl.
+    def visitStringDecl(self, ctx:cpp20Parser.StringDeclContext):
         return self.visitChildren(ctx)
 
 

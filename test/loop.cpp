@@ -10,6 +10,5 @@ int main(){
     int b = 2;
     for(a = 1, b = 2; a <= 10; a = a + 1){
         b = b + 1;
-        
     }
 }

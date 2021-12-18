@@ -305,6 +305,15 @@ class cpp20ParserListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by cpp20Parser#varDeclWithConstInit.
+    def enterVarDeclWithConstInit(self, ctx:cpp20Parser.VarDeclWithConstInitContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#varDeclWithConstInit.
+    def exitVarDeclWithConstInit(self, ctx:cpp20Parser.VarDeclWithConstInitContext):
+        pass
+
+
     # Enter a parse tree produced by cpp20Parser#varDeclWithInit.
     def enterVarDeclWithInit(self, ctx:cpp20Parser.VarDeclWithInitContext):
         pass

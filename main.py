@@ -1,5 +1,5 @@
 from antlr4 import *
-from llvmlite.ir.values import ReturnValue
+from llvmlite.ir.values import GlobalVariable, ReturnValue
 import sys
 
 from src.cpp20Lexer import cpp20Lexer
@@ -46,15 +46,42 @@ class myCpp20Visitor(cpp20Visitor):
         elif(name == "int16"):
             return int16
 
+        
+    def visitConstExpression(self, ctx: cpp20Parser.ConstExpressionContext):
+        return self.visit(ctx.literals())
+
+    def visitVarDeclWithConstInit(self, ctx: cpp20Parser.VarDeclWithConstInitContext):
+        '''
+            语法： Identifier ASSIGN constExpression #varDeclWithConstInit
+        '''
+        if(self.symbolTable.current_scope_level == 0):
+            newvar = GlobalVariable(self.Module,self.type,ctx.Identifier().getText())
+            newvar.initializer = self.visit(ctx.constExpression())['value']
+            self.symbolTable.addGlobal(ctx.Identifier().getText(),
+                NameProperty(
+                    type  = self.type,
+                    value = newvar)) # 只需要记录虚拟寄存器即可   
+        else:
+            self.symbolTable.addLocal(ctx.Identifier().getText(),
+                NameProperty(
+                    type= self.type,
+                    value=self.visit(ctx.constExpression())['value'])) # 只需要记录虚拟寄存器即可  
+        return 
+    
     def visitVarDeclWithInit(self, ctx: cpp20Parser.VarDeclWithInitContext):
         '''
         对应语法：Identifier ASSIGN expression
         '''
         # print("varDeclWithInit")
-        self.symbolTable.addLocal(ctx.Identifier().getText(),
-            NameProperty(
-                type= self.type,
-                value=self.visit(ctx.expression())['value'])) # 只需要记录虚拟寄存器即可        
+        if(self.symbolTable.current_scope_level == 0):
+            #全局变量
+            raise BaseException("global var must be initialized with a const expression")
+        else:
+            #局部变量
+            self.symbolTable.addLocal(ctx.Identifier().getText(),
+                NameProperty(
+                    type= self.type,
+                    value=self.visit(ctx.expression())['value'])) # 只需要记录虚拟寄存器即可        
         
 
         return
@@ -64,11 +91,17 @@ class myCpp20Visitor(cpp20Visitor):
         对应语法：Identifier
         '''
         # print(f"varDeclWithOutInit: {ctx.Identifier().getText()}")
-        
-        self.symbolTable.addLocal(ctx.Identifier().getText(),
-            NameProperty(
-                type=self.type,
-                value=None)) # 这里可能还是得给一个初始的值，但是也未必
+        if(self.symbolTable.current_scope_level == 0):
+            newvar = GlobalVariable(self.Module,self.type,ctx.Identifier().getText())
+            self.symbolTable.addGlobal(ctx.Identifier().getText(),
+                NameProperty(
+                    type=self.type,
+                    value=newvar))
+        else:
+            self.symbolTable.addLocal(ctx.Identifier().getText(),
+                NameProperty(
+                    type=self.type,
+                    value=None)) # 这里可能还是得给一个初始的值，但是也未必
         return
 
     def visitVariableDeclarator(self, ctx: cpp20Parser.VariableDeclaratorContext):
@@ -144,7 +177,6 @@ class myCpp20Visitor(cpp20Visitor):
         Builder = self.Builders[-1]
         functionName = ctx.Identifier().getText()
         property = self.symbolTable.getProperty(functionName)
-        # print(property.get_type())
         if(property.get_type().__class__.__name__ == ir.FunctionType.__name__):
             # 参数列表
             paramList = []
@@ -385,11 +417,15 @@ class myCpp20Visitor(cpp20Visitor):
                 对应语法：expression: Identifier
                 '''
                 symbol = self.symbolTable.getProperty(ctx.getText())
+                if(symbol.level == 0):
+                    ret_value = Builder.load(symbol.get_value())
+                else:
+                    ret_value = symbol.get_value()
                 return {
                     'name':ctx.getText(),
-                    'type':symbol.get_type(),
+                    'type':ret_value.type,
                     'signed':symbol.get_signed(),
-                    'value':symbol.get_value()
+                    'value':ret_value
                 }
 
         elif(ChildCount == 2):
@@ -505,8 +541,16 @@ class myCpp20Visitor(cpp20Visitor):
                 if(ChildCount==1):
                     #leftExpression为变量
                     print(left," is an varible")
-                    left,right = self.assignTypeConvert(left,right) # 强制类型转换
-                    self.symbolTable.setProperty(left['name'], value = right['value'])
+                    if(left['level']==0): # 全局变量
+                        # 强制转换就先不管了
+                        Builder.store(right['value'],left['value'])
+                        return {
+                            'type':right['type'],   
+                            'value': Builder.load(left['value'])
+                        }
+                    else:
+                        left,right = self.assignTypeConvert(left,right) # 强制类型转换
+                        self.symbolTable.setProperty(left['name'], value = right['value'])
                 else:
                     #leftExpression为数组
                     print(left," is an arrayItem")
@@ -625,7 +669,8 @@ class myCpp20Visitor(cpp20Visitor):
                     'name':ctx.getText(),
                     'type':symbol.get_type(),
                     'signed':symbol.get_signed(),
-                    'value':symbol.get_value()
+                    'value':symbol.get_value(),
+                    'level':symbol.level
                 }
     
     
@@ -740,7 +785,7 @@ class myCpp20Visitor(cpp20Visitor):
         
         #JudgeBlock
         if(flag2):
-            self.Builders.branch(JudgeBlock)
+            self.Builders[-1].branch(JudgeBlock)
             self.Builders.pop()
             self.Builders.append(ir.IRBuilder(JudgeBlock))
             result = self.visit(ctx.getChild(expressionIndex))
@@ -790,7 +835,7 @@ class myCpp20Visitor(cpp20Visitor):
             #条件跳转
             result = self.visit(ctx.getChild(2))
             condition = self.toBool(result)
-            Builder.cbranch(condition['value'], TrueBlock, FalseBlock)
+            Builder.cbranch(condition['value'], trueblock, falseblock)
             
             #if块
             trueblockbuilder = ir.IRBuilder(trueblock)

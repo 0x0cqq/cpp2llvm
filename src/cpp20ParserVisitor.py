@@ -174,6 +174,11 @@ class cpp20ParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by cpp20Parser#varDeclWithConstInit.
+    def visitVarDeclWithConstInit(self, ctx:cpp20Parser.VarDeclWithConstInitContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by cpp20Parser#varDeclWithInit.
     def visitVarDeclWithInit(self, ctx:cpp20Parser.VarDeclWithInitContext):
         return self.visitChildren(ctx)

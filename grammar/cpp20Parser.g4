@@ -46,9 +46,13 @@ classDefinition: (CLASS | STRUCT) Identifier (COLON baseSpecifierList)? LBRACE m
 
 constExpression : literals;
 
+
+
+
 leftExpression :
     Identifier
     | Identifier (LSQUARE DecimalLiteral RSQUARE) ;
+
 
 expression :
     functionCall 
@@ -110,6 +114,7 @@ whileStatement : WHILE LPAREN expression RPAREN statement;
 doWhileStatement : DO statement WHILE LPAREN expression RPAREN SEMI;
 
 forStatement : FOR LPAREN forExprSet? SEMI expression? SEMI forExprSet? RPAREN statement;
+
 forExprSet: expression (COMMA expression)*;
 
 returnStatement : RETURN expression? SEMI;
@@ -121,6 +126,7 @@ continueStatement : CONTINUE SEMI;
 
 // Declaration
 
+
 declaration : 
     arrayDeclarator
     | variableDeclarator
@@ -130,7 +136,9 @@ declaration :
 arrayDeclarator : 
     typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN LBRACE expression (COMMA expression)* RBRACE)?;
 
+// with global variable in line 2
 variableDeclaration: Identifier  #varDeclWithoutInit
+    | Identifier ASSIGN constExpression #varDeclWithConstInit
     | Identifier ASSIGN expression #varDeclWithInit
     ;
 
@@ -141,7 +149,8 @@ functionDeclaration :
     typeSpecifier Identifier LPAREN (functionParameter (COMMA functionParameter)*)? RPAREN block;
 
 functionParameter :
-    typeSpecifier Identifier;
+    typeSpecifier Identifier
+    | DOTS;
 
 typeSpecifier : 
     integerTypeSpecifier

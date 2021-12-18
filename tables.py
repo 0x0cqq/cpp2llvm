@@ -4,10 +4,11 @@ import copy
 # 构成：
 # type, ... 
 class NameProperty: 
-    def __init__(self, type, value, signed=True):
+    def __init__(self, type, value, level = 0,signed=True):
         self.type = type
         self.value = value
         self.signed = signed
+        self.level = 0
     def get_type(self):
         return self.type
     def set_type(self, type):
@@ -48,17 +49,19 @@ class NameTable:
     def addGlobal(self, name : str, property: NameProperty):
         if(self.table[0].get(name) != None):
             raise BaseException("global name already exist")
+        property.level = 0
         self.table[0].update({name : property})
     
     def addLocal(self, name : str, property: NameProperty):
         if(self.table[self.current_scope_level].get(name) != None):
             raise BaseException("local name already exist")
+        property.level = self.current_scope_level
         self.table[self.current_scope_level].update({name : property})
     
     def getProperty(self, name : str) -> NameProperty:
         for i in range(self.current_scope_level, -1, -1):
             if(self.table[i].get(name) != None):
-                return self.table[i].get(name)
+                return self.table[i].get(name) # 增加了一个层数判断是不是全局变量
         raise BaseException("name not exist")
     
     def setProperty(self, name : str, value):

@@ -26,7 +26,7 @@ stringLiteral: CharTypeSpecificaton? DQUOTE SChar* DQUOTE;
 
 // translation
 
-translationUnit : declaration*;
+translationUnit : declaration* EOF;
 
 baseSpecifierList: (accessSpecifier? Identifier) (COMMA accessSpecifier? Identifier)*;
 
@@ -56,6 +56,7 @@ expression :
     | Identifier
     | LPAREN expression RPAREN
     | NOT expression
+    | SUB expression
     | expression MULT expression 
     | expression DIV expression 
     | expression MOD expression 

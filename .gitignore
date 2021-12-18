@@ -1,2 +1,4 @@
 .antlr/
 __pycache__
+*.ir
+*.log

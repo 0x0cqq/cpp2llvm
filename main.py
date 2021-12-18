@@ -1,5 +1,6 @@
 from antlr4 import *
 from llvmlite.ir.values import ReturnValue
+import sys
 
 from src.cpp20Lexer import cpp20Lexer
 from src.cpp20Parser import cpp20Parser
@@ -34,6 +35,10 @@ class myCpp20Visitor(cpp20Visitor):
         self.Switchexpression = []
         # 用于存储switch表达式中label的值
         self.Switchcaselabel = []
+
+        # break,continue语句跳转到的block
+        self.blockToBreak=[]
+        self.blockToContinue=[]
 
     def getTypeFromText(name : str) :
         if(name == "int"):
@@ -78,7 +83,7 @@ class myCpp20Visitor(cpp20Visitor):
         
         self.type = self.visit(ctx.typeSpecifier())
         
-        print("type:", self.type)
+        # print("type:", self.type)
 
         for declaration in ctx.variableDeclaration():
             self.visit(declaration)
@@ -146,7 +151,7 @@ class myCpp20Visitor(cpp20Visitor):
             for expression in ctx.expression():
                 paramList.append(self.visit(expression)['value'])
             # 检查合法性
-            print("paramList & argsList: ", paramList,property.get_type().args)
+            # print("paramList & argsList: ", paramList,property.get_type().args)
             if(len(paramList) != len(property.get_type().args)):
                 raise BaseException("wrong args number")
             for real_param, param in zip(paramList,property.get_type().args):
@@ -171,10 +176,11 @@ class myCpp20Visitor(cpp20Visitor):
         for param in ctx.functionParameter():
             ParameterList.append(self.visit(param))
         ParameterList = tuple(ParameterList)
-        print(ParameterList)
+        # print(ParameterList)
         ParameterTypeTuple = (param['type'] for param in ParameterList)
         # if(ParameterList == []):
         #     ParameterList.append(None)
+        # print("print par", ParameterTypeTuple)
         #生成llvm函数
         LLVMFuncType = ir.FunctionType(ReturnType,ParameterTypeTuple)
         LLVMFunc = ir.Function(self.Module, LLVMFuncType, name=FunctionName)
@@ -212,6 +218,16 @@ class myCpp20Visitor(cpp20Visitor):
         Type = self.visit(ctx.getChild(0))
         return Type
     
+    def visitRealTypeSpecifier(self, ctx: cpp20Parser.RealTypeSpecifierContext):
+        return double
+    
+    def visitBooleanTypeSpecifier(self, ctx: cpp20Parser.BooleanTypeSpecifierContext):
+        return int1
+
+    def visitCharTypeSpecifier(self, ctx: cpp20Parser.CharTypeSpecifierContext):
+        return int8
+    
+
     def visitIntegerTypeSpecifier(self, ctx: cpp20Parser.IntegerTypeSpecifierContext):
         if(ctx.getText()== 'int' or ctx.getText() == 'long'):
             return int32
@@ -378,19 +394,31 @@ class myCpp20Visitor(cpp20Visitor):
 
         elif(ChildCount == 2):
             '''
-            对应语法：expression: NOT expression
+            对应语法：expression: NOT expression | - expression
             '''  
             Builder = self.Builders[-1]
             result = self.visit(ctx.getChild(1))
-            if result['type'] == double:
-                ValueToReturn = Builder.fcmp_ordered('!=', result['value'], ir.Constant(int1,0))
-            else:
-                ValueToReturn = Builder.icmp_signed('!=', result['value'], ir.Constant(int1,0))
-            return {
-                'type':int1,
-                'signed':True,
-                'value':ValueToReturn
-            }
+            if(ctx.getChild(0).getText() == '!'):
+                if result['type'] == double:
+                    ValueToReturn = Builder.fcmp_ordered('!=', result['value'], ir.Constant(int1,0))
+                else:
+                    ValueToReturn = Builder.icmp_signed('!=', result['value'], ir.Constant(int1,0))
+                return {
+                    'type':int1,
+                    'signed':True,
+                    'value':ValueToReturn
+                }
+            elif(ctx.getChild(0).getText() == '-'):
+                if result['type'] == double:
+                    ValueToReturn = Builder.fneg(result['value'])
+                else:
+                    ValueToReturn = Builder.neg(result['value'])
+                return {
+                    'type':result['type'],
+                    'signed':True,
+                    'value':ValueToReturn
+                }
+                
           
         elif(ChildCount > 3):
             '''
@@ -611,27 +639,33 @@ class myCpp20Visitor(cpp20Visitor):
         expressionBlock = Builder.append_basic_block()
         whileStatementBlock = Builder.append_basic_block()
         endWhileBlock = Builder.append_basic_block()
-        
+
+        self.blockToBreak.append(endWhileBlock)
+        self.blockToContinue.append(expressionBlock)
+
         #expressionBlock
+        Builder.branch(expressionBlock)
         self.Builders.pop()
-        newBuilder = ir.IRBuilder(expressionBlock)
-        self.Builders.append(newBuilder)
+        self.Builders.append(ir.IRBuilder(expressionBlock))
         result = self.visit(ctx.getChild(2))
         condition = self.toBool(result)
-        newBuilder.cbranch(condition['value'],whileStatementBlock,endWhileBlock)
+        self.Builders[-1].cbranch(condition['value'],whileStatementBlock,endWhileBlock)
         
         #whileStatementBlock
         self.Builders.pop()
-        newBuilder = ir.IRBuilder(whileStatementBlock)
-        self.Builders.append(newBuilder)
+        self.Builders.append(ir.IRBuilder(whileStatementBlock))
+        print("this blocktobreak",self.blockToBreak[-1])
         self.visit(ctx.getChild(4))
-        newBuilder.branch(expressionBlock)
+        if(not self.Builders[-1].block.is_terminated):
+            self.Builders[-1].branch(expressionBlock)
 
         #endWhileBlock
         self.Builders.pop()
-        newBuilder = ir.IRBuilder(endWhileBlock)
-        self.Builders.append(newBuilder)
-        print("end")
+        self.Builders.append(ir.IRBuilder(endWhileBlock))
+
+        self.blockToContinue.pop()
+        self.blockToBreak.pop()
+
         return
 
     def visitDoWhileStatement(self, ctx: cpp20Parser.DoWhileStatementContext):
@@ -643,27 +677,29 @@ class myCpp20Visitor(cpp20Visitor):
         doStatementBlock = Builder.append_basic_block()
         expressionBlock = Builder.append_basic_block()
         endWhileBlock = Builder.append_basic_block()
-        
+        self.blockToBreak.append(endWhileBlock)
+        self.blockToContinue.append(expressionBlock)
+
         #doStatementBlock
         self.Builders.pop()
-        newBuilder = ir.IRBuilder(doStatementBlock)
-        self.Builders.append(newBuilder)
+        self.Builders.append(ir.IRBuilder(doStatementBlock))
         self.visit(ctx.getChild(1))
-        newBuilder.branch(expressionBlock)
+        if(not self.Builders[-1].block.is_terminated):
+            self.Builders[-1].branch(expressionBlock)
 
         #expressionBlock
+        self.Builders[-1].branch(expressionBlock)
         self.Builders.pop()
-        newBuilder = ir.IRBuilder(expressionBlock)
-        self.Builders.append(newBuilder)
+        self.Builders.append(ir.IRBuilder(expressionBlock))
         result = self.visit(ctx.getChild(4))
         condition = self.toBool(result)
-        newBuilder.cbranch(condition['value'],doStatementBlock,endWhileBlock)
+        self.Builders[-1].cbranch(condition['value'],doStatementBlock,endWhileBlock)
 
         #endWhileBlock
         self.Builders.pop()
-        newBuilder = ir.IRBuilder(endWhileBlock)
-        self.Builders.append(newBuilder)
-        
+        self.Builders.append(ir.IRBuilder(endWhileBlock))
+        self.blockToContinue.pop()
+        self.blockToBreak.pop()
         return
 
     def visitForStatement(self, ctx: cpp20Parser.ForStatementContext):
@@ -694,39 +730,47 @@ class myCpp20Visitor(cpp20Visitor):
         if(flag1):
             self.visit(ctx.getChild(2))
 
-        #新建语法块，JudgeBlock,loopBlock,endLoopBlock
-        if(flag2):
-            JudgeBlock = Builder.append_basic_block()
-            endLoopBlock = Builder.append_basic_block()
+        #新建语法块，JudgeBlock,loopBlock,forExpr3Block,endLoopBlock
+        JudgeBlock = Builder.append_basic_block()
         loopBlock = Builder.append_basic_block()
-
+        forExpr3Block = Builder.append_basic_block()
+        endLoopBlock = Builder.append_basic_block()
+        self.blockToBreak.append(endLoopBlock)
+        self.blockToContinue.append(forExpr3Block)
+        
         #JudgeBlock
         if(flag2):
+            self.Builders.branch(JudgeBlock)
             self.Builders.pop()
-            newBuilder = ir.IRBuilder(JudgeBlock)
-            self.Builders.append(newBuilder)
+            self.Builders.append(ir.IRBuilder(JudgeBlock))
             result = self.visit(ctx.getChild(expressionIndex))
             condition = self.toBool(result)
-            newBuilder.cbranch(condition['value'],loopBlock,endLoopBlock)
+            self.Builders[-1].cbranch(condition['value'],loopBlock,endLoopBlock)
 
         #loopBlock
         self.Builders.pop()
-        newBuilder = ir.IRBuilder(loopBlock)
-        self.Builders.append(newBuilder)
+        self.Builders.append(ir.IRBuilder(loopBlock))
         self.visit(ctx.getChild(ChildCount-1))
+        if(not self.Builders[-1].block.is_terminated):
+            self.Builders[-1].branch(forExpr3Block)
+
+        #forExpr3Block
+        self.Builders.pop()
+        self.Builders.append(ir.IRBuilder(forExpr3Block))
         if(flag3):
             self.visit(ctx.getChild(ChildCount-3))
         if(flag2):
-            newBuilder.branch(JudgeBlock)
+            self.Builders[-1].branch(JudgeBlock)
         else:
-            newBuilder.branch(loopBlock)
+            self.Builders[-1].branch(loopBlock)    
+
 
         #endLoopBlock
-        if(flag2):
-            self.Builders.pop()
-            newBuilder = ir.IRBuilder(endLoopBlock)
-            self.Builders.append(newBuilder)
-
+        self.Builders.pop() 
+        self.Builders.append(ir.IRBuilder(endLoopBlock))
+        self.blockToBreak.pop()
+        self.blockToContinue.pop()
+            
         return
         
     def visitIfStatement(self, ctx:cpp20Parser.IfStatementContext):
@@ -753,14 +797,17 @@ class myCpp20Visitor(cpp20Visitor):
             self.Builders.pop()
             self.Builders.append(trueblockbuilder)
             self.visit(ctx.getChild(4))
-            self.Builders[-1].branch(endblock)
+            if(not self.Builders[-1].block.is_terminated):
+                self.Builders[-1].branch(endblock)
             
             #else块
             falseblockbuilder = ir.IRBuilder(falseblock)
             self.Builders.pop()
             self.Builders.append(falseblockbuilder)
             self.visit(ctx.getChild(6))
-            self.Builders[-1].branch(endblock)
+            #self.Builders[-1].branch(endblock)
+            if(not self.Builders[-1].block.is_terminated):
+                self.Builders[-1].branch(endblock)
             
             #endif标识符
             self.Builders.pop()
@@ -780,7 +827,8 @@ class myCpp20Visitor(cpp20Visitor):
             self.Builders.pop()
             self.Builders.append(trueblockbuilder)
             self.visit(ctx.getChild(4))
-            self.Builders[-1].branch(endblock)
+            if(not self.Builders[-1].block.is_terminated):
+                self.Builders[-1].branch(endblock)
             
             #endif标识符
             self.Builders.pop()
@@ -805,7 +853,10 @@ class myCpp20Visitor(cpp20Visitor):
         for i in range(casenum*2+2):
             temarray.append(Builder.append_basic_block())
         self.Switchcaselabel.append(temarray)
+        self.blockToBreak.append(temarray[-1])
+        print("len(break)",len(self.blockToBreak))
         EndSwitch = temarray[-1]
+        
         Builder.branch(temarray[0])
         
         for i in range(casenum):
@@ -818,6 +869,7 @@ class myCpp20Visitor(cpp20Visitor):
         
         self.Switchexpression.pop()
         self.Switchcaselabel.pop()
+        self.blockToBreak.pop()
         
         self.symbolTable.exitScope()
         return
@@ -827,6 +879,7 @@ class myCpp20Visitor(cpp20Visitor):
         caseStatement : CASE constExpression COLON statement;
         '''
         print(f"visitCaseStatement:{ctx.getText()}, {ctx.getChildCount()}")
+        print("len(break)",len(self.blockToBreak))
         self.symbolTable.enterScope()
         judgeblock = self.Switchcaselabel[-1][0]
         statementblock = self.Switchcaselabel[-1][1]
@@ -852,8 +905,10 @@ class myCpp20Visitor(cpp20Visitor):
         
         self.Builders.pop()
         self.Builders.append(ir.IRBuilder(statementblock))
+        print("len(break)",len(self.blockToBreak))
         self.visit(ctx.getChild(3))
-        self.Builders[-1].branch(targetstatementblock)
+        if(not self.Builders[-1].block.is_terminated):
+            self.Builders[-1].branch(targetstatementblock)
         
         self.symbolTable.exitScope()
         
@@ -863,8 +918,35 @@ class myCpp20Visitor(cpp20Visitor):
         
         
         
+
+    def visitBreakStatement(self, ctx: cpp20Parser.BreakStatementContext):
+        print(f"visitBreakStatement:{ctx.getText()}, {ctx.getChildCount()}")
+        print("len(break)",len(self.blockToBreak))
+        if self.blockToBreak:
+            Builder = self.Builders[-1]
+            Builder.branch(self.blockToBreak[-1])
+        else:
+            raise BaseException("cannot break")        
+        return
+
+    def visitContinueStatement(self, ctx: cpp20Parser.ContinueStatementContext):
+        if self.blockToContinue:
+            Builder = self.Builders[-1]
+            Builder.branch(self.blockToContinue[-1])
+        else:
+            raise BaseException("cannot continue")
+        return
+
 if __name__ == "__main__":
-    input_stream = FileStream("test2.cpp")
+    if(len(sys.argv) < 2):
+        filename = "test2.cpp"
+        outputfilename = None
+    else:
+        filename = sys.argv[1]
+        outputfilename = sys.argv[2] 
+    # print(filename)      
+    
+    input_stream = FileStream(filename)
     # lexer
     lexer = cpp20Lexer(input_stream)
     stream = CommonTokenStream(lexer)
@@ -874,5 +956,9 @@ if __name__ == "__main__":
     print(tree.toStringTree(recog=parser))
     visitor = myCpp20Visitor()
     visitor.visit(tree)
-    print(visitor.Module)
+    if(outputfilename):
+        with open(outputfilename, 'w') as f:
+            f.write(str(visitor.Module))
+    else:
+        print(visitor.Module)
     pass

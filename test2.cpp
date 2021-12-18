@@ -2,9 +2,13 @@ int main(){
     int a=1;
     a=2+1;
     int b = 2+3 ;
-    for(a=b+1,b=a+2; b<a ; b=b+1){
-        a = 2+3;
-    }
-    a = 10 + 1 ;
+	switch(a)
+	{
+		case 1:
+			if(b==1)
+				b=9+9;
+		case 2:
+			b=2+2;
+	}
     return 0;
 }

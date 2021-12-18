@@ -1,4 +1,3 @@
-int a[10];
 int main(){
-    char s[9] = "applepen";
+    char s[10] = "apple\npen";
 }

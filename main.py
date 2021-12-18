@@ -185,7 +185,10 @@ class myCpp20Visitor(cpp20Visitor):
             elementIndex = 1
             while(elementIndex < ScharNum-1):
                 charNum = stringLiteral.getChild(elementIndex)
-                CharToStore = ir.Constant(ArrayType,charNum)
+                if(charNum=='\n'):
+                    CharToStore = ir.Constant(ArrayType,10)
+                else:
+                    CharToStore = ir.Constant(ArrayType,charNum)
                 address = Builder.gep(NewVar,[ir.Constant(int32,0),ir.Constant(int32,elementIndex)])
                 Builder.store(CharToStore,address)
                 elementIndex += 1

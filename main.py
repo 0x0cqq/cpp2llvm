@@ -29,6 +29,11 @@ class myCpp20Visitor(cpp20Visitor):
 
         # 符号表
         self.symbolTable = NameTable()
+        
+        # 用于存储switch表达式的结果，来与case匹配
+        self.Switchexpression = []
+        # 用于存储switch表达式中label的值
+        self.Switchcaselabel = []
 
     def getTypeFromText(name : str) :
         if(name == "int"):
@@ -600,6 +605,7 @@ class myCpp20Visitor(cpp20Visitor):
         '''
         对应语法：WHILE LPAREN expression RPAREN statement
         '''
+        print(f"visitWhileStatement:{ctx.getText()}, {ctx.getChildCount()}")
         Builder = self.Builders[-1]
         #新建三个块，代表判断条件，while循环内部块，while循环外
         expressionBlock = Builder.append_basic_block()
@@ -625,7 +631,7 @@ class myCpp20Visitor(cpp20Visitor):
         self.Builders.pop()
         newBuilder = ir.IRBuilder(endWhileBlock)
         self.Builders.append(newBuilder)
-        
+        print("end")
         return
 
     def visitDoWhileStatement(self, ctx: cpp20Parser.DoWhileStatementContext):
@@ -729,58 +735,133 @@ class myCpp20Visitor(cpp20Visitor):
         '''
         print(f"visitIfStatement:{ctx.getText()}, {ctx.getChildCount()}")
         self.symbolTable.enterScope()
-        ChildCount=ctx.getChildCount()
         Builder = self.Builders[-1]
-        TrueBlock = Builder.append_basic_block()
+        trueblock = Builder.append_basic_block()
 
         #if else的情况
         if len(ctx.statement())==2:
-            FalseBlock = Builder.append_basic_block()
-            EndBlock = Builder.append_basic_block()
+            falseblock = Builder.append_basic_block()
+            endblock = Builder.append_basic_block()
             
             #条件跳转
             result = self.visit(ctx.getChild(2))
-            Builder.cbranch(result['value'], TrueBlock, FalseBlock)
+            condition = self.toBool(result)
+            Builder.cbranch(condition['value'], TrueBlock, FalseBlock)
             
             #if块
-            TrueBlockBuilder = ir.IRBuilder(TrueBlock)
+            trueblockbuilder = ir.IRBuilder(trueblock)
             self.Builders.pop()
-            self.Builders.append(TrueBlockBuilder)
+            self.Builders.append(trueblockbuilder)
             self.visit(ctx.getChild(4))
-            TrueBlockBuilder.branch(EndBlock)
+            self.Builders[-1].branch(endblock)
             
             #else块
-            FalseBlockBuilder = ir.IRBuilder(FalseBlock)
+            falseblockbuilder = ir.IRBuilder(falseblock)
             self.Builders.pop()
-            self.Builders.append(FalseBlockBuilder)
+            self.Builders.append(falseblockbuilder)
             self.visit(ctx.getChild(6))
-            FalseBlockBuilder.branch(EndBlock)
+            self.Builders[-1].branch(endblock)
             
             #endif标识符
             self.Builders.pop()
-            self.Builders.append(ir.IRBuilder(EndBlock))
+            self.Builders.append(ir.IRBuilder(endblock))
             
         #只有if没有else的情况
         else:
-            EndBlock = Builder.append_basic_block()
+            endblock = Builder.append_basic_block()
             
             #条件跳转
             result = self.visit(ctx.getChild(2))
-            Builder.cbranch(result['value'], TrueBlock, EndBlock)
+            condition = self.toBool(result)
+            Builder.cbranch(condition['value'], trueblock, endblock)
             
             #if块
-            TrueBlockBuilder = ir.IRBuilder(TrueBlock)
+            trueblockbuilder = ir.IRBuilder(trueblock)
             self.Builders.pop()
-            self.Builders.append(TrueBlockBuilder)
+            self.Builders.append(trueblockbuilder)
             self.visit(ctx.getChild(4))
-            TrueBlockBuilder.branch(EndBlock)
+            self.Builders[-1].branch(endblock)
             
             #endif标识符
             self.Builders.pop()
-            self.Builders.append(ir.IRBuilder(EndBlock))
+            self.Builders.append(ir.IRBuilder(endblock))
 
         self.symbolTable.exitScope()
         return
+    
+    def visitSwitchStatement(self, ctx:cpp20Parser.SwitchStatementContext):
+        '''
+        switchStatement : SWITCH LPAREN expression RPAREN LBRACE (caseStatement)* RBRACE;
+        '''
+        print(f"visitSwitchStatement:{ctx.getText()}, {ctx.getChildCount()}")
+        self.symbolTable.enterScope()
+        casenum = ctx.getChildCount()-6
+        Builder = self.Builders[-1]
+        
+        result = self.visit(ctx.getChild(2))
+        self.Switchexpression.append(result)
+        
+        temarray = []
+        for i in range(casenum*2+2):
+            temarray.append(Builder.append_basic_block())
+        self.Switchcaselabel.append(temarray)
+        EndSwitch = temarray[-1]
+        Builder.branch(temarray[0])
+        
+        for i in range(casenum):
+            self.visit(ctx.getChild(i+5))
+        
+        assert len(self.Switchcaselabel[-1]) == 2
+        ir.IRBuilder(self.Switchcaselabel[-1][0]).branch(self.Switchcaselabel[-1][1])
+        self.Builders.pop()
+        self.Builders.append(ir.IRBuilder(self.Switchcaselabel[-1][1]))
+        
+        self.Switchexpression.pop()
+        self.Switchcaselabel.pop()
+        
+        self.symbolTable.exitScope()
+        return
+        
+    def visitCaseStatement(self, ctx:cpp20Parser.CaseStatementContext):
+        '''
+        caseStatement : CASE constExpression COLON statement;
+        '''
+        print(f"visitCaseStatement:{ctx.getText()}, {ctx.getChildCount()}")
+        self.symbolTable.enterScope()
+        judgeblock = self.Switchcaselabel[-1][0]
+        statementblock = self.Switchcaselabel[-1][1]
+        targetjudgeblock = self.Switchcaselabel[-1][2]
+        targetstatementblock = self.Switchcaselabel[-1][3]
+        
+        judgebuilder = ir.IRBuilder(judgeblock)
+        
+        left = self.Switchexpression[-1]
+        right = self.visit(ctx.getChild(1))
+            
+        left,right = self.exprTypeConvert(left,right)
+        Operation = '=='
+        if(left['type']==double):
+            valueToReturn = judgebuilder.fcmp_ordered(Operation,left['value'],right['value'])
+        elif(left['type']==int32 or left['type'] == int64 or left['type'] == int8 or left['type']==int1):
+            if(left['signed']):
+                valueToReturn = judgebuilder.icmp_signed(Operation,left['value'],right['value'])
+            else:
+                valueToReturn = judgebuilder.icmp_unsigned(Operation,left['value'],right['value'])                
+        
+        judgebuilder.cbranch(valueToReturn, statementblock, targetjudgeblock)
+        
+        self.Builders.pop()
+        self.Builders.append(ir.IRBuilder(statementblock))
+        self.visit(ctx.getChild(3))
+        self.Builders[-1].branch(targetstatementblock)
+        
+        self.symbolTable.exitScope()
+        
+        self.Switchcaselabel[-1].pop(0)
+        self.Switchcaselabel[-1].pop(0)
+        return
+        
+        
         
 if __name__ == "__main__":
     input_stream = FileStream("test2.cpp")

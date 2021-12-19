@@ -33,6 +33,7 @@ void merge(int l, int r) {
 	for (k = l;k < r;k++) {
 		array[k] = reg[k];
 	}
+	return;
 }
 
 void mergeSort(int l, int r) {
@@ -45,9 +46,10 @@ void mergeSort(int l, int r) {
 		mergeSort(mid, r);
 		merge(l, r);
 	}
+	return;
 }
 
-int print(int x);
+int printf(char* s, ...);
 
 int main() {
 	array[0] = 5;
@@ -64,7 +66,7 @@ int main() {
 	mergeSort(0, N);
 	int i;
 	for(i=0;i<N;i++){
-		print(array[i]);
+		printf("%d", array[i]);
 	}
 	return 0;
 }

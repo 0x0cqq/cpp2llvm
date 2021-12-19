@@ -11,5 +11,5 @@ int main(){
     } else {
         a = a - 1;
     }
-
+    return 0;
 }

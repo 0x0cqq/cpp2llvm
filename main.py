@@ -206,8 +206,21 @@ class myCpp20Visitor(cpp20Visitor):
         
         symbolProperty = NameProperty(LLVMArrayType,NewVar)
         self.symbolTable.addLocal(ArrayName,symbolProperty)
-
-
+        ChildCount=ctx.getChildCount()
+        if ChildCount>5:
+            stringLiteral = ctx.getChild(6)
+            ScharNum = stringLiteral.getChildCount()
+            elementIndex = 1
+            while(elementIndex < ScharNum-1):
+                charNum = stringLiteral.getChild(elementIndex)
+                print(charNum)
+                if(charNum=='\n'):
+                    CharToStore = ir.Constant(ArrayType,charNum)
+                else:
+                    CharToStore = ir.Constant(ArrayType,charNum)
+                address = Builder.gep(NewVar,[ir.Constant(int32,0),ir.Constant(int32,elementIndex)])
+                Builder.store(CharToStore,address)
+                elementIndex += 1
         return
 
     def visitReturnStatement(self, ctx: cpp20Parser.ReturnStatementContext):
@@ -621,8 +634,8 @@ class myCpp20Visitor(cpp20Visitor):
                 return{
                     'type':index.get_type().element,
                     'signed':True,
-                    'value':ValueToReturn,
-                    'address':Address
+                    'value':ValueToReturn
+                    # 'address':Address
                 }
             else:
                 raise BaseException("the array isn't defined")
@@ -811,6 +824,7 @@ class myCpp20Visitor(cpp20Visitor):
     
     def visitLeftExpression(self, ctx: cpp20Parser.LeftExpressionContext):
         if(ctx.getText()[-1]==']'):
+            
             '''
             对应语法: leftExpression:Identifier (LSQUARE expression RSQUARE)
             '''
@@ -818,7 +832,7 @@ class myCpp20Visitor(cpp20Visitor):
             subscribe = self.visit(ctx.getChild(2))['value']
             if(isinstance(index.get_type(),ir.types.ArrayType)):
                 Builder = self.Builders[-1]
-                Address = Builder.gep(index.get_value(),[ir.Constant(int32,0),ir.Constant(int32,subscribe)],inbounds=True)
+                Address = Builder.gep(index.get_value(),[ir.Constant(int32,0),subscribe],inbounds=True)
                 ValueToReturn = Builder.load(Address)
                 print("call arrayItem",ValueToReturn)
                 return{

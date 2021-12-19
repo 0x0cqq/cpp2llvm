@@ -282,6 +282,8 @@ Identifier: NONDIGIT (DIGIT | NONDIGIT)*;
 
 IntegerSuffix: UnsignedSuffix? (LongLongSuffix | LongSuffix );
 
+StringLiteral:
+	DQUOTE SChar* DQUOTE;
 
 // General Literals
 fragment UnsignedSuffix: 'u' | 'U';

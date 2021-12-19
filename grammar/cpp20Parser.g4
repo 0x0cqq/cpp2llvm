@@ -21,7 +21,7 @@ integerLiteral: DecimalLiteral;
 
 characterLiteral: CharTypeSpecificaton? SQUOTE CChar SQUOTE;
 
-stringLiteral: DQUOTE SChar* DQUOTE;
+stringLiteral: StringLiteral;
 
 // translation
 

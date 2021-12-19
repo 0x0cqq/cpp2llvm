@@ -1,6 +1,7 @@
 from antlr4 import *
 from llvmlite.ir.values import GlobalVariable, ReturnValue
 import sys
+import ast
 
 from src.cpp20Lexer import cpp20Lexer
 from src.cpp20Parser import cpp20Parser
@@ -126,7 +127,7 @@ class myCpp20Visitor(cpp20Visitor):
     
     def visitNormalArrDecl(self, ctx: cpp20Parser.NormalArrDeclContext):
         '''
-        对应语法：typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN LBRACE expression (COMMA expression)* RBRACE)?;
+        对应语法：typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN LBRACE expression (COMMA expression)* RBRACE)? SEMI;
         '''
         #数组长度
         ArrayLength = int(ctx.getChild(3).getText())
@@ -157,10 +158,11 @@ class myCpp20Visitor(cpp20Visitor):
                 ChildToVisit += 2
                 elementIndex += 1
         return 
+    
 
     def visitStringDecl(self, ctx: cpp20Parser.StringDeclContext):
         '''
-        对应语法：typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN stringLiteral)
+        对应语法：typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN stringLiteral) SEMI 
         '''
         #数组长度
         ArrayLength = int(ctx.getChild(3).getText())
@@ -179,18 +181,15 @@ class myCpp20Visitor(cpp20Visitor):
         symbolProperty = NameProperty(LLVMArrayType,NewVar)
         self.symbolTable.addLocal(ArrayName,symbolProperty)
         ChildCount=ctx.getChildCount()
-        if ChildCount>5:
-            stringLiteral = ctx.getChild(6)
-            ScharNum = stringLiteral.getChildCount()
-            elementIndex = 1
+        if ChildCount>6:
+            stringLiteral = self.visit(ctx.stringLiteral())
+            ScharNum = len(stringLiteral)
+            elementIndex = 0
             while(elementIndex < ScharNum-1):
-                charNum = stringLiteral.getChild(elementIndex)
-                if(charNum=='\n'):
-                    CharToStore = ir.Constant(ArrayType,charNum)
-                else:
-                    CharToStore = ir.Constant(ArrayType,charNum)
+                charToStore = ir.Constant(ArrayType,ord(stringLiteral[elementIndex]))
+
                 address = Builder.gep(NewVar,[ir.Constant(int32,0),ir.Constant(int32,elementIndex)])
-                Builder.store(CharToStore,address)
+                Builder.store(charToStore,address)
                 elementIndex += 1
         return
 
@@ -755,6 +754,12 @@ class myCpp20Visitor(cpp20Visitor):
             'type':double,
             'value':ir.Constant(double,float(ctx.getText()))
         }
+    
+    def visitStringLiteral(self, ctx: cpp20Parser.StringLiteralContext):
+        # 笑死，根本写不出来
+        return ast.literal_eval(ctx.getText())
+        
+
     
     def visitLeftExpression(self, ctx: cpp20Parser.LeftExpressionContext):
         if(ctx.getText()[-1]==']'):

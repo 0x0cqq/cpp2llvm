@@ -51,6 +51,8 @@ class myCpp20Visitor(cpp20Visitor):
         # 全局字符串的数量
         self.string_count = 0
 
+        self.Module.triple="x86_64-pc-linux"
+
     def getTypeFromText(name : str) :
         if(name == "int"):
             return int32
@@ -246,7 +248,11 @@ class myCpp20Visitor(cpp20Visitor):
             # 参数列表
             paramList = []
             for expression in ctx.expression():
-                paramList.append(self.visit(expression)['value'])
+                expression_value = self.visit(expression) 
+                if('address' in expression_value):
+                    paramList.append(self.visit(expression)['address'])
+                else:
+                    paramList.append(self.visit(expression)['value'])
             # 检查合法性
             # print("paramList & argsList: ", paramList,property.get_type().args)
             if(property.get_type().var_arg):
@@ -259,7 +265,7 @@ class myCpp20Visitor(cpp20Visitor):
                 raise BaseException("wrong args number")
             for real_param, param in zip(vaild_paramList,property.get_type().args):
                 if(param != real_param.type):
-                    raise BaseException("wrong args type")
+                    raise BaseException("wrong args type",real_param.type,param)
             # 函数调用
             ret_value = Builder.call(property.get_value(), paramList, name='', cconv=None, tail=False, fastmath=())
             ret_type = property.get_type().return_type
@@ -793,6 +799,10 @@ class myCpp20Visitor(cpp20Visitor):
         string_address = ir.GlobalVariable(self.Module,string_type,'__string_'+str(self.string_count))
         string_address.initializer = ir.Constant(string_type,bytearray(s,encoding='ascii'))
         self.string_count += 1
+        if(self.symbolTable.current_scope_level != 0):
+            # a local variable
+            Builder = self.Builders[-1]
+            string_address = Builder.gep(string_address, [ir.Constant(int32,0),ir.Constant(int32,0)], inbounds=True)
         return {
             'type' : string_type,
             'address' : string_address

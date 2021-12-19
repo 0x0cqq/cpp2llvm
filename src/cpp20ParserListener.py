@@ -377,6 +377,15 @@ class cpp20ParserListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by cpp20Parser#pointerTypeSpecifier.
+    def enterPointerTypeSpecifier(self, ctx:cpp20Parser.PointerTypeSpecifierContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#pointerTypeSpecifier.
+    def exitPointerTypeSpecifier(self, ctx:cpp20Parser.PointerTypeSpecifierContext):
+        pass
+
+
     # Enter a parse tree produced by cpp20Parser#integerTypeSpecifier.
     def enterIntegerTypeSpecifier(self, ctx:cpp20Parser.IntegerTypeSpecifierContext):
         pass

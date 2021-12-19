@@ -1,7 +1,6 @@
-int print(int a, ...);
+int print(char* a, ...);
 
 int main(){
-    int a = 0;
-    a = a + 1;
-    a = print(a,1,2,3,4,5);
+    int b = 1;
+    b = b + 2;
 }

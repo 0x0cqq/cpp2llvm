@@ -154,8 +154,11 @@ functionDeclaration :
     ; 
 
 functionParameter :
-    typeSpecifier Identifier
+    pointerTypeSpecifier Identifier
+    | typeSpecifier Identifier
     | DOTS;
+
+
 
 typeSpecifier : 
     integerTypeSpecifier
@@ -163,6 +166,10 @@ typeSpecifier :
     | booleanTypeSpecifier
     | charTypeSpecifier
     | voidTypeSpecifier
+    ;
+
+pointerTypeSpecifier : 
+    typeSpecifier MULT
     ;
 
 integerTypeSpecifier : 

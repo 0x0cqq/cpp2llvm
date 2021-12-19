@@ -1,4 +1,5 @@
 from antlr4 import *
+from llvmlite.ir.types import ArrayType
 from llvmlite.ir.values import GlobalVariable, ReturnValue
 import sys
 import ast
@@ -17,6 +18,12 @@ int16 = ir.IntType(16)
 int32 = ir.IntType(32)
 int64 = ir.IntType(64)
 void = ir.VoidType()
+
+int8p = ir.PointerType(int8)
+int16p = ir.PointerType(int16)
+int32p = ir.PointerType(int32)
+int64p = ir.PointerType(int64)
+doublep = ir.PointerType(double)
 
 class myCpp20Visitor(cpp20Visitor):
     def __init__(self):
@@ -41,6 +48,9 @@ class myCpp20Visitor(cpp20Visitor):
         self.blockToBreak=[]
         self.blockToContinue=[]
 
+        # 全局字符串的数量
+        self.string_count = 0
+
     def getTypeFromText(name : str) :
         if(name == "int"):
             return int32
@@ -53,7 +63,7 @@ class myCpp20Visitor(cpp20Visitor):
 
     def visitVarDeclWithConstInit(self, ctx: cpp20Parser.VarDeclWithConstInitContext):
         '''
-            语法： Identifier ASSIGN constExpression #varDeclWithConstInit
+            语法:  Identifier ASSIGN constExpression #varDeclWithConstInit
         '''
         if(self.symbolTable.current_scope_level == 0):
             newvar = GlobalVariable(self.Module,self.type,ctx.Identifier().getText())
@@ -71,7 +81,7 @@ class myCpp20Visitor(cpp20Visitor):
     
     def visitVarDeclWithInit(self, ctx: cpp20Parser.VarDeclWithInitContext):
         '''
-        对应语法：Identifier ASSIGN expression
+        对应语法: Identifier ASSIGN expression
         '''
         # print("varDeclWithInit")
         if(self.symbolTable.current_scope_level == 0):
@@ -89,7 +99,7 @@ class myCpp20Visitor(cpp20Visitor):
 
     def visitVarDeclWithoutInit(self, ctx: cpp20Parser.VarDeclWithoutInitContext):
         '''
-        对应语法：Identifier
+        对应语法: Identifier
         '''
         # print(f"varDeclWithOutInit: {ctx.Identifier().getText()}")
         if(self.symbolTable.current_scope_level == 0):
@@ -107,7 +117,7 @@ class myCpp20Visitor(cpp20Visitor):
 
     def visitVariableDeclarator(self, ctx: cpp20Parser.VariableDeclaratorContext):
         '''
-        对应语法 ：typeSpecifier variableDeclaration (COMMA variableDeclaration)* SEMI;
+        对应语法 : typeSpecifier variableDeclaration (COMMA variableDeclaration)* SEMI;
         '''
         # print("Variable Declaration")
         # print(f"{len(ctx.variableDeclaration())} variables: ",end='')
@@ -127,7 +137,7 @@ class myCpp20Visitor(cpp20Visitor):
     
     def visitNormalArrDecl(self, ctx: cpp20Parser.NormalArrDeclContext):
         '''
-        对应语法：typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN LBRACE expression (COMMA expression)* RBRACE)? SEMI;
+        对应语法: typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN LBRACE expression (COMMA expression)* RBRACE)? SEMI;
         '''
         #数组长度
         ArrayLength = int(ctx.getChild(3).getText())
@@ -162,56 +172,64 @@ class myCpp20Visitor(cpp20Visitor):
 
     def visitStringDecl(self, ctx: cpp20Parser.StringDeclContext):
         '''
-        对应语法：typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN stringLiteral) SEMI 
+        对应语法: charTypeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN stringLiteral) SEMI 
         '''
         #数组长度
-        ArrayLength = int(ctx.getChild(3).getText())
+        ArrayLength = int(ctx.DecimalLiteral().getText())
         #数据类型
-        ArrayType = self.visit(ctx.getChild(0))
+        ArrayType = self.visit(ctx.charTypeSpecifier())
         LLVMArrayType = ir.ArrayType(ArrayType,ArrayLength)
         #数据标识符
-        ArrayName = ctx.getChild(1).getText()
+        ArrayName = ctx.Identifier().getText()
         #变量的声明
+        ChildCount=ctx.getChildCount()
         if(self.symbolTable.current_scope_level == 0):
-            NewVar=ir.GlobalVariable(self.Module,LLVMArrayType,name = ArrayName)
+            if ctx.stringLiteral() is not None:
+                NewVar=self.visit(ctx.stringLiteral())['address']
+            else:
+                NewVar=ir.GlobalVariable(self.Module,LLVMArrayType,name = ArrayName)
+ 
         else:
             Builder=self.Builders[-1]
             NewVar=Builder.alloca(LLVMArrayType,name = ArrayName)
-
+            if ctx.stringLiteral() is not None:
+                string = ast.literal_eval(ctx.stringLiteral().getText())
+                charNum = len(string)
+                elementIndex = 0
+                while(elementIndex < charNum):
+                    charToStore = ir.Constant(ArrayType,ord(string[elementIndex]))
+                    address = Builder.gep(NewVar,[ir.Constant(int32,0),ir.Constant(int32,elementIndex)])
+                    Builder.store(charToStore,address)
+                    elementIndex += 1
+        
         symbolProperty = NameProperty(LLVMArrayType,NewVar)
         self.symbolTable.addLocal(ArrayName,symbolProperty)
-        ChildCount=ctx.getChildCount()
-        if ChildCount>6:
-            stringLiteral = self.visit(ctx.stringLiteral())
-            ScharNum = len(stringLiteral)
-            elementIndex = 0
-            while(elementIndex < ScharNum-1):
-                charToStore = ir.Constant(ArrayType,ord(stringLiteral[elementIndex]))
 
-                address = Builder.gep(NewVar,[ir.Constant(int32,0),ir.Constant(int32,elementIndex)])
-                Builder.store(charToStore,address)
-                elementIndex += 1
+
         return
 
     def visitReturnStatement(self, ctx: cpp20Parser.ReturnStatementContext):
         '''
-            对应语法： RETURN expression? SEMI;
+            对应语法:  RETURN expression? SEMI;
         '''
         if(ctx.expression() is None):
             self.Builders[-1].ret_void()
         else:
             self.Builders[-1].ret(self.visit(ctx.expression())['value'])
 
+    
+
     def visitFunctionParameter(self, ctx: cpp20Parser.FunctionParameterContext):
         '''
-            对应语法：typeSpecifier Identifier | DOTS;
+            对应语法: pointerTypeSpecifier Identifier | typeSpecifier Identifier | DOTS;
         '''
         if(ctx.DOTS() is None):
+            # 可能是指针，也有可能是普通类型
             return {
                 "name": ctx.Identifier().getText(),
-                "type": self.visit(ctx.typeSpecifier())
+                "type": self.visit(ctx.getChild(0))
             }
-        else:
+        else: # 有 varargs
             return {
                 "name": "varargs",
                 "type": "varargs"
@@ -219,7 +237,7 @@ class myCpp20Visitor(cpp20Visitor):
 
     def visitFunctionCall(self, ctx: cpp20Parser.FunctionCallContext):
         '''
-        对应语法：functionCall : Identifier LPAREN (expression (COMMA expression)*)? RPAREN;
+        对应语法: functionCall : Identifier LPAREN (expression (COMMA expression)*)? RPAREN;
         '''
         Builder = self.Builders[-1]
         functionName = ctx.Identifier().getText()
@@ -283,7 +301,7 @@ class myCpp20Visitor(cpp20Visitor):
     def visitFunctionDef(self, ctx: cpp20Parser.FunctionDefContext):
         #print(f"visitfunctionDefinition: {ctx.Identifier().getText()}",) #test for debug
         '''
-        对应语法：typeSpecifier Identifier '(' (functionParameter (COMMA functionParameter)*)? ')' block
+        对应语法: typeSpecifier Identifier '(' (functionParameter (COMMA functionParameter)*)? ')' block
         '''
         #函数名
         FunctionName = ctx.getChild(1).getText()
@@ -329,9 +347,18 @@ class myCpp20Visitor(cpp20Visitor):
         }
     pass
 
+    def visitPointerTypeSpecifier(self, ctx: cpp20Parser.PointerTypeSpecifierContext):
+        '''
+            对应语法: typeSpecifier MULT
+        '''
+
+        varType = self.visit(ctx.typeSpecifier())
+        return ir.PointerType(varType)
+        
+
     def visitTypeSpecifier(self, ctx: cpp20Parser.TypeSpecifierContext):
         '''
-        对应语法：typeSpecifier : integerTypeSpecifier | realTypeSpecifier | booleanTypeSpecifier | charTypeSpecifier | voidTypeSpecifier;
+        对应语法: typeSpecifier : integerTypeSpecifier | realTypeSpecifier | booleanTypeSpecifier | charTypeSpecifier | voidTypeSpecifier;
         '''
         #TODO: 定义visitRealTypeSpecifier即后面类型的函数
         Type = self.visit(ctx.getChild(0))
@@ -476,7 +503,7 @@ class myCpp20Visitor(cpp20Visitor):
     
     def exprTypeConvert(self,left,right):
         #left和right的符号类型不一致时，类型转换为一致，向大的类型转换
-        #left,right可能的类型：int1,int8,int16,int32,int64,double...（暂时支持这几种）
+        #left,right可能的类型: int1,int8,int16,int32,int64,double...（暂时支持这几种）
         if(left['type']==right['type']):
             return left,right
         elif self.isInt(left) and self.isInt(right):
@@ -498,13 +525,13 @@ class myCpp20Visitor(cpp20Visitor):
             grandChildren = ctx.getChild(0).getChildCount()
             if(grandChildren):
                 '''
-                对应语法：expression: Literals|functionCall;
+                对应语法: expression: Literals|functionCall;
                 '''
                 result = self.visit(ctx.getChild(0))
                 return result
             else:
                 '''
-                对应语法：expression: Identifier
+                对应语法: expression: Identifier
                 '''
                 symbol = self.symbolTable.getProperty(ctx.getText())
                 if(symbol.level == 0):
@@ -520,8 +547,8 @@ class myCpp20Visitor(cpp20Visitor):
 
         elif(ChildCount == 2):
             '''
-            对应语法：expression: NOT expression | SUB expression
-            对应语法：leftexpression MINUS_MINUS | leftexpression PLUS_PLUS
+            对应语法: expression: NOT expression | SUB expression
+            对应语法: leftexpression MINUS_MINUS | leftexpression PLUS_PLUS
             '''  
             if(ctx.getChild(0).getText() == '-' or ctx.getChild(0).getText() == '!'):
                 Builder = self.Builders[-1]
@@ -576,7 +603,7 @@ class myCpp20Visitor(cpp20Visitor):
                     }
         elif(ChildCount > 3):
             '''
-            对应语法：expression: Identifier '[' expression ']'
+            对应语法: expression: Identifier '[' expression ']'
             '''
             index = self.symbolTable.getProperty(ctx.getChild(0).getText())
             subscribe = self.visit(ctx.getChild(2))['value']
@@ -596,7 +623,7 @@ class myCpp20Visitor(cpp20Visitor):
 
         elif(ChildCount == 3 and ctx.getChild(0).getText()=='('):
             '''
-            对应语法：expression: '(' expression ')'
+            对应语法: expression: '(' expression ')'
             '''
             result = self.visit(ctx.getChild(1))
             return result
@@ -609,7 +636,7 @@ class myCpp20Visitor(cpp20Visitor):
             right = self.visit(ctx.getChild(2))
             if(self.isExprJudge(Operation)):
                 '''
-                对应语法： expression: expression '==' | '!=' | '<' | '<=' | '>' | '>=' expr
+                对应语法:  expression: expression '==' | '!=' | '<' | '<=' | '>' | '>=' expr
                 '''
                 left,right = self.exprTypeConvert(left,right)
                 if(left['type']==double):
@@ -627,7 +654,7 @@ class myCpp20Visitor(cpp20Visitor):
 
             elif(Operation == '+' or Operation == '-' or Operation == '*' or Operation == '/' or Operation == '%' or Operation == '<<' or Operation == '>>'):
                 '''
-                对应语法：expression: expression '+'|'-'|'*'|'/'|'%' expression
+                对应语法: expression: expression '+'|'-'|'*'|'/'|'%' expression
                 '''
                 left,right = self.exprTypeConvert(left,right)
                 if(Operation == '+'):
@@ -652,7 +679,7 @@ class myCpp20Visitor(cpp20Visitor):
 
             elif(Operation == '='):
                 '''
-                对应语法： expression: leftExpression '=' expression
+                对应语法:  expression: leftExpression '=' expression
                 '''
                 # result = self.visit(ctx.expression())
                 ChildCount=ctx.getChild(0).getChildCount()
@@ -675,7 +702,7 @@ class myCpp20Visitor(cpp20Visitor):
 
             elif(Operation == '|' or Operation == 'bitor' or Operation == '&' or Operation == 'bitand' or Operation == '^' or Operation == 'xor'):
                 '''
-                对应语法： expression: expression BITOR|BITAND|XOR expression
+                对应语法:  expression: expression BITOR|BITAND|XOR expression
                 '''
                 left,right = self.exprTypeConvert(left,right)
                 Signed = False
@@ -695,7 +722,7 @@ class myCpp20Visitor(cpp20Visitor):
             
             elif(Operation == '&&' or Operation == 'and' or Operation == '||' or Operation == 'or'):
                 '''
-                对应语法：expression AND|OR expression
+                对应语法: expression AND|OR expression
                 '''
                 left = self.toBool(left)
                 right = self.toBool(right)
@@ -757,14 +784,25 @@ class myCpp20Visitor(cpp20Visitor):
     
     def visitStringLiteral(self, ctx: cpp20Parser.StringLiteralContext):
         # 笑死，根本写不出来
-        return ast.literal_eval(ctx.getText())
+        # 可以在这里就开一个全局变量orz
+        # 反正字符串肯定得塞到全局变量里面orz
         
+        s = ast.literal_eval(ctx.getText())
+        
+        string_type = ArrayType(int8,len(s))
+        string_address = ir.GlobalVariable(self.Module,string_type,'__string_'+str(self.string_count))
+        string_address.initializer = ir.Constant(string_type,bytearray(s,encoding='ascii'))
+        self.string_count += 1
+        return {
+            'type' : string_type,
+            'address' : string_address
+        }        
 
     
     def visitLeftExpression(self, ctx: cpp20Parser.LeftExpressionContext):
         if(ctx.getText()[-1]==']'):
             '''
-            对应语法：leftExpression:Identifier (LSQUARE expression RSQUARE)
+            对应语法: leftExpression:Identifier (LSQUARE expression RSQUARE)
             '''
             index = self.symbolTable.getProperty(ctx.getChild(0).getText())
             subscribe = self.visit(ctx.getChild(2))['value']
@@ -784,7 +822,7 @@ class myCpp20Visitor(cpp20Visitor):
             
         else:
             '''
-            对应语法：leftExpression:Identifier
+            对应语法: leftExpression:Identifier
             '''
             symbol = self.symbolTable.getProperty(ctx.getText())
             if(symbol.level == 0):
@@ -803,7 +841,7 @@ class myCpp20Visitor(cpp20Visitor):
     
     def visitWhileStatement(self, ctx: cpp20Parser.WhileStatementContext):
         '''
-        对应语法：WHILE LPAREN expression RPAREN statement
+        对应语法: WHILE LPAREN expression RPAREN statement
         '''
         print(f"visitWhileStatement:{ctx.getText()}, {ctx.getChildCount()}")
         Builder = self.Builders[-1]
@@ -842,7 +880,7 @@ class myCpp20Visitor(cpp20Visitor):
 
     def visitDoWhileStatement(self, ctx: cpp20Parser.DoWhileStatementContext):
         '''
-        对应语法：DO statement WHILE LPAREN expression RPAREN SEMI;
+        对应语法: DO statement WHILE LPAREN expression RPAREN SEMI;
         '''
         Builder = self.Builders[-1]
         #新建语法块，doStatementBlock,expressionblock,endWhileBlock
@@ -876,7 +914,7 @@ class myCpp20Visitor(cpp20Visitor):
 
     def visitForStatement(self, ctx: cpp20Parser.ForStatementContext):
         '''
-        对应语法：FOR LPAREN forExprSet? SEMI expression? SEMI forExprSet? RPAREN statement;
+        对应语法: FOR LPAREN forExprSet? SEMI expression? SEMI forExprSet? RPAREN statement;
         '''
         Builder = self.Builders[-1]
         #判断三个expression是否存在

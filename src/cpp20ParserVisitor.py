@@ -214,6 +214,11 @@ class cpp20ParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by cpp20Parser#pointerTypeSpecifier.
+    def visitPointerTypeSpecifier(self, ctx:cpp20Parser.PointerTypeSpecifierContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by cpp20Parser#integerTypeSpecifier.
     def visitIntegerTypeSpecifier(self, ctx:cpp20Parser.IntegerTypeSpecifierContext):
         return self.visitChildren(ctx)

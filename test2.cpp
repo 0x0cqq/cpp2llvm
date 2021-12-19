@@ -1,8 +1,9 @@
-int printf(char* a, ...);
+int printf(char* s, ...);
 
-int main(){
-    int b = 1;
-    b = b + 2;
-    printf("%d\n",b);
-    return 0;
+int main() {
+    int a = 1;
+	while(a<3){
+		a=a+1;
+	}
+	return 0;
 }

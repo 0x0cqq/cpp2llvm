@@ -5,8 +5,8 @@ int main(){
     int b = 0;
     b = b + 1;
     b = a + b;
-    double c = 0.0;
-    c = c + 1;
     a = -a;
-    c = -c;
+    double c = 1.0;
+    c = c + 1;
+    return 0;
 }

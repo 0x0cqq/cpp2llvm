@@ -69,6 +69,7 @@ class myCpp20Visitor(cpp20Visitor):
         '''
         if(self.symbolTable.current_scope_level == 0):
             newvar = GlobalVariable(self.Module,self.type,ctx.Identifier().getText())
+            newvar.linkage = 'internal'
             newvar.initializer = self.visit(ctx.constExpression())['value']
             self.symbolTable.addGlobal(ctx.Identifier().getText(),
                 NameProperty(
@@ -106,6 +107,8 @@ class myCpp20Visitor(cpp20Visitor):
         # print(f"varDeclWithOutInit: {ctx.Identifier().getText()}")
         if(self.symbolTable.current_scope_level == 0):
             newvar = GlobalVariable(self.Module,self.type,ctx.Identifier().getText())
+            newvar.linkage='internal'
+            newvar.initializer=ir.Constant(self.type,None)
             self.symbolTable.addGlobal(ctx.Identifier().getText(),
                 NameProperty(
                     type=self.type,
@@ -151,6 +154,8 @@ class myCpp20Visitor(cpp20Visitor):
         #变量的声明
         if(self.symbolTable.current_scope_level == 0):
             NewVar=ir.GlobalVariable(self.Module,LLVMArrayType,name = ArrayName)
+            NewVar.linkage='internal'
+            NewVar.initializer=ir.Constant(LLVMArrayType,None)
         else:
             Builder=self.Builders[-1]
             NewVar=Builder.alloca(LLVMArrayType,name = ArrayName)
@@ -190,6 +195,8 @@ class myCpp20Visitor(cpp20Visitor):
                 NewVar=self.visit(ctx.stringLiteral())['address']
             else:
                 NewVar=ir.GlobalVariable(self.Module,LLVMArrayType,name = ArrayName)
+                NewVar.linkage='internal'
+                NewVar.initializer=ir.Constant(LLVMArrayType,None)
  
         else:
             Builder=self.Builders[-1]
@@ -497,9 +504,9 @@ class myCpp20Visitor(cpp20Visitor):
     def toBool(self,llvmNum):
         Builder = self.Builders[-1]
         if llvmNum['type'] == double:
-            ValueToReturn = Builder.fcmp_ordered('==', llvmNum['value'], ir.Constant(int1,0))
+            ValueToReturn = Builder.fcmp_ordered('!=', llvmNum['value'], ir.Constant(int1,0))
         else:
-            ValueToReturn = Builder.icmp_signed('==', llvmNum['value'], ir.Constant(int1,0))
+            ValueToReturn = Builder.icmp_signed('!=', llvmNum['value'], ir.Constant(int1,0))
         return{
             'type':int1,
             'signed':True,
@@ -677,15 +684,30 @@ class myCpp20Visitor(cpp20Visitor):
                 '''
                 left,right = self.exprTypeConvert(left,right)
                 if(Operation == '+'):
-                    valueToReturn = Builder.add(left['value'],right['value'])
+                    if(left['type']==double):
+                        valueToReturn = Builder.fadd(left['value'],right['value'])
+                    else:
+                        valueToReturn = Builder.add(left['value'],right['value'])
                 elif(Operation == '-'):
-                    valueToReturn = Builder.sub(left['value'],right['value'])
+                    if(left['type']==double): 
+                        valueToReturn = Builder.fsub(left['value'],right['value'])
+                    else:
+                        valueToReturn = Builder.sub(left['value'],right['value'])
                 elif(Operation == '*'):
-                    valueToReturn = Builder.mul(left['value'],right['value'])
+                    if left['type']==double:
+                        valueToReturn = Builder.fmul(left['value'],right['value'])
+                    else:
+                        valueToReturn = Builder.mul(left['value'],right['value'])
                 elif(Operation == '/'):
-                    valueToReturn = Builder.sdiv(left['value'],right['value'])
+                    if left['type'] == double:
+                        valueToReturn = Builder.fdiv(left['value'],right['value'])
+                    else:
+                        valueToReturn = Builder.sdiv(left['value'],right['value'])
                 elif(Operation == '%'):
-                    valueToReturn = Builder.srem(left['value'],right['value'])
+                    if left['type']==double:
+                        valueToReturn = Builder.srem(left['value'],right['value'])
+                    else:
+                        valueToReturn = Builder.frem(left['value'],right['value'])
                 elif(Operation == '<<'):
                     valueToReturn = Builder.shl(left['value'],right['value'])
                 elif(Operation == '>>'):
@@ -810,6 +832,8 @@ class myCpp20Visitor(cpp20Visitor):
         
         string_type = ArrayType(int8,len(s))
         string_address = ir.GlobalVariable(self.Module,string_type,'__string_'+str(self.string_count))
+        string_address.linkage='internal'
+        string_address.initializer=ir.Constant(string_type,None)
         string_address.initializer = ir.Constant(string_type,bytearray(s,encoding='ascii'))
         self.string_count += 1
         if(self.symbolTable.current_scope_level != 0):

@@ -11,7 +11,7 @@ class MyClass : public classA {
             // ...
         }
         void method() {
-            int a[10uLL];
+            int a[10];
             a[1] = 2;
 
         }

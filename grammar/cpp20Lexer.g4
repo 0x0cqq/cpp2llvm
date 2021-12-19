@@ -278,10 +278,10 @@ LINE_COMMENT:
 
 COMMENT: '/*' .*? '*/' -> channel(HIDDEN);
 
+Identifier: NONDIGIT (DIGIT | NONDIGIT)*;
 
 IntegerSuffix: UnsignedSuffix? (LongLongSuffix | LongSuffix );
 
-Identifier: NONDIGIT (DIGIT | NONDIGIT)*;
 
 // General Literals
 fragment UnsignedSuffix: 'u' | 'U';
@@ -290,14 +290,12 @@ fragment LongSuffix: 'l' | 'L';
 
 fragment LongLongSuffix: 'll' | 'LL';
 
-DecimalLiteral: '0' | (('1' ..'9') ('0' ..'9')*);
+DecimalLiteral: '0' | (('1' ..'9') ('0' ..'9')*) IntegerSuffix?;
 
 FloatingLiteral:
 	 (DigitSequence DecimalExponent )
 	| (DigitSequence DOT DecimalExponent)
     | (DigitSequence DOT DigitSequence DecimalExponent?);
-
-
 
 // Floating literals
 
@@ -311,10 +309,13 @@ DecimalExponent: ('e' | 'E') (ADD | SUB)? DigitSequence;
 
 // Character literals
 
+SChar: ~["\\\r\n] | Escapesequence | Universalcharactername;
+
+CChar: ~ ['\\\r\n] | Escapesequence | Universalcharactername;
 
 CharTypeSpecificaton: ('u8' | 'u' | 'U' | 'L');
 
-CChar: ~ ['\\\r\n] | Escapesequence | Universalcharactername;
+
 
 Escapesequence:
 	Simpleescapesequence
@@ -347,7 +348,6 @@ Universalcharactername: '\\u' HEXQUAD | '\\U' HEXQUAD HEXQUAD;
 
 // Strings Literals
 
-SChar: ~ ["\\\r\n] | Escapesequence | Universalcharactername;
 
 // RawString is not supported User defined literals are not supported
 

@@ -1,4 +1,4 @@
-# Generated from grammar/cpp20Parser.g4 by ANTLR 4.9
+# Generated from grammar/cpp20Parser.g4 by ANTLR 4.9.3
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .cpp20Parser import cpp20Parser
@@ -194,8 +194,13 @@ class cpp20ParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by cpp20Parser#functionDeclaration.
-    def visitFunctionDeclaration(self, ctx:cpp20Parser.FunctionDeclarationContext):
+    # Visit a parse tree produced by cpp20Parser#functionDecl.
+    def visitFunctionDecl(self, ctx:cpp20Parser.FunctionDeclContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by cpp20Parser#functionDef.
+    def visitFunctionDef(self, ctx:cpp20Parser.FunctionDefContext):
         return self.visitChildren(ctx)
 
 

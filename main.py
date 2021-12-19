@@ -145,9 +145,9 @@ class myCpp20Visitor(cpp20Visitor):
         symbolProperty = NameProperty(LLVMArrayType,NewVar)
         self.symbolTable.addLocal(ArrayName,symbolProperty)
         ChildCount=ctx.getChildCount()
-        if ChildCount > 5:
+        if ChildCount > 6:
             #赋初值给数组中的元素
-            ChildToVisit = 7
+            ChildToVisit = 8
             elementIndex = 0
             Builder = self.Builders[-1]
             while(elementIndex<ArrayLength and ChildToVisit<ChildCount):
@@ -205,12 +205,18 @@ class myCpp20Visitor(cpp20Visitor):
 
     def visitFunctionParameter(self, ctx: cpp20Parser.FunctionParameterContext):
         '''
-            对应语法：typeSpecifier Identifier;
+            对应语法：typeSpecifier Identifier | DOTS;
         '''
-        return {
-            "name": ctx.Identifier().getText(),
-            "type": self.visit(ctx.typeSpecifier())
-        }
+        if(ctx.DOTS() is None):
+            return {
+                "name": ctx.Identifier().getText(),
+                "type": self.visit(ctx.typeSpecifier())
+            }
+        else:
+            return {
+                "name": "varargs",
+                "type": "varargs"
+            }
 
     def visitFunctionCall(self, ctx: cpp20Parser.FunctionCallContext):
         '''
@@ -226,19 +232,57 @@ class myCpp20Visitor(cpp20Visitor):
                 paramList.append(self.visit(expression)['value'])
             # 检查合法性
             # print("paramList & argsList: ", paramList,property.get_type().args)
-            if(len(paramList) != len(property.get_type().args)):
+            if(property.get_type().var_arg):
+                # 只和vararg之前的比较
+                vaild_paramList = paramList[:len(property.get_type().args)]
+            else:
+                vaild_paramList = paramList
+
+            if(len(vaild_paramList) != len(property.get_type().args)):
                 raise BaseException("wrong args number")
-            for real_param, param in zip(paramList,property.get_type().args):
+            for real_param, param in zip(vaild_paramList,property.get_type().args):
                 if(param != real_param.type):
                     raise BaseException("wrong args type")
             # 函数调用
-            return Builder.call(property.get_value(), paramList, name='', cconv=None, tail=False, fastmath=())
+            ret_value = Builder.call(property.get_value(), paramList, name='', cconv=None, tail=False, fastmath=())
+            ret_type = property.get_type().return_type
+            return {
+                "type" : ret_type,
+                'value': ret_value
+            }
         else:
             raise BaseException("not a function name")
 
+    def visitFunctionDecl(self, ctx: cpp20Parser.FunctionDeclContext):
+        '''
+            typeSpecifier Identifier LPAREN (functionParameter (COMMA functionParameter)*)? RPAREN SEMI #functionDef
+        '''
+        # print("visit function declaration")
+        #函数名
+        FunctionName = ctx.Identifier().getText()
+        ReturnType = self.visit(ctx.typeSpecifier())
+        ParameterList = []
+        for param in ctx.functionParameter():
+            ParameterList.append(self.visit(param))
+        ParameterList = tuple(ParameterList)
+        # print(ParameterList)
+        ParameterTypeTuple = tuple(param['type'] for param in ParameterList)
+        is_var_arg = "varargs" in ParameterTypeTuple
+        if(is_var_arg):
+            if(ParameterTypeTuple.count("varargs") > 1):
+                raise BaseException("too many varargs")
+            if(ParameterTypeTuple[-1] != "varargs"):
+                raise BaseException("varargs must be the last parameter")
+            ParameterTypeTuple = ParameterTypeTuple[:-1]
+        # 声明而非定义
+        LLVMFuncType = ir.FunctionType(ReturnType,ParameterTypeTuple,var_arg=is_var_arg)
+        LLVMFunc = ir.Function(self.Module, LLVMFuncType, name=FunctionName)
+        self.symbolTable.addGlobal(FunctionName,NameProperty(type = LLVMFuncType,value = LLVMFunc))
+
+
     
-    def visitFunctionDeclaration(self, ctx: cpp20Parser.FunctionDeclarationContext):
-        #print(f"visitFunctionDeclaration: {ctx.Identifier().getText()}",) #test for debug
+    def visitFunctionDef(self, ctx: cpp20Parser.FunctionDefContext):
+        #print(f"visitfunctionDefinition: {ctx.Identifier().getText()}",) #test for debug
         '''
         对应语法：typeSpecifier Identifier '(' (functionParameter (COMMA functionParameter)*)? ')' block
         '''
@@ -251,7 +295,9 @@ class myCpp20Visitor(cpp20Visitor):
             ParameterList.append(self.visit(param))
         ParameterList = tuple(ParameterList)
         # print(ParameterList)
-        ParameterTypeTuple = (param['type'] for param in ParameterList)
+        ParameterTypeTuple = tuple(param['type'] for param in ParameterList)
+        if("varargs" in ParameterTypeTuple):
+            raise BaseException("varargs not allowed in function definition")
         # if(ParameterList == []):
         #     ParameterList.append(None)
         # print("print par", ParameterTypeTuple)
@@ -292,6 +338,9 @@ class myCpp20Visitor(cpp20Visitor):
         Type = self.visit(ctx.getChild(0))
         return Type
     
+    def visitVoidTypeSpecifier(self, ctx: cpp20Parser.VoidTypeSpecifierContext):
+        return void
+
     def visitRealTypeSpecifier(self, ctx: cpp20Parser.RealTypeSpecifierContext):
         return double
     
@@ -472,41 +521,69 @@ class myCpp20Visitor(cpp20Visitor):
 
         elif(ChildCount == 2):
             '''
-            对应语法：expression: NOT expression | - expression
+            对应语法：expression: NOT expression | SUB expression
+            对应语法：leftexpression MINUS_MINUS | leftexpression PLUS_PLUS
             '''  
-            Builder = self.Builders[-1]
-            result = self.visit(ctx.getChild(1))
-            if(ctx.getChild(0).getText() == '!'):
-                if result['type'] == double:
-                    ValueToReturn = Builder.fcmp_ordered('!=', result['value'], ir.Constant(int1,0))
+            if(ctx.getChild(0).getText() == '-' or ctx.getChild(0).getText() == '!'):
+                Builder = self.Builders[-1]
+                result = self.visit(ctx.getChild(1))
+                if(ctx.getChild(0).getText() == '!'):
+                    if result['type'] == double:
+                        ValueToReturn = Builder.fcmp_ordered('!=', result['value'], ir.Constant(int1,0))
+                    else:
+                        ValueToReturn = Builder.icmp_signed('!=', result['value'], ir.Constant(int1,0))
+                    return {
+                        'type':int1,
+                        'signed':True,
+                        'value':ValueToReturn
+                    }
+                elif(ctx.getChild(0).getText() == '-'):
+                    if result['type'] == double:
+                        ValueToReturn = Builder.fneg(result['value'])
+                    else:
+                        ValueToReturn = Builder.neg(result['value'])
+                    return {
+                        'type':result['type'],
+                        'signed':True,
+                        'value':ValueToReturn
+                    }
+            else:
+                # 减减或者加加
+                Builder = self.Builders[-1]
+                lhs = self.visit(ctx.getChild(0))
+                # 先 load
+                if('address' in lhs):
+                    lhs['value'] = Builder.load(lhs['address'])
+                # 再 + 1 / -1
+                if(ctx.getChild(1).getText() == '++'):
+                    ValueToReturn = Builder.add(lhs['value'],ir.Constant(lhs['type'],1))
                 else:
-                    ValueToReturn = Builder.icmp_signed('!=', result['value'], ir.Constant(int1,0))
-                return {
-                    'type':int1,
-                    'signed':True,
-                    'value':ValueToReturn
-                }
-            elif(ctx.getChild(0).getText() == '-'):
-                if result['type'] == double:
-                    ValueToReturn = Builder.fneg(result['value'])
-                else:
-                    ValueToReturn = Builder.neg(result['value'])
-                return {
-                    'type':result['type'],
-                    'signed':True,
-                    'value':ValueToReturn
-                }
-                
-          
+                    ValueToReturn = Builder.sub(lhs['value'],ir.Constant(lhs['type'],1))
+                # 存储
+                if('address' in lhs): # 数组，反正是地址
+                    Builder.store(ValueToReturn, lhs['address'])
+                    return {
+                        'type':lhs['type'],
+                        'signed':True,
+                        'address':lhs['address'],
+                        'value': ValueToReturn
+                    }    
+                else: # 变量
+                    self.symbolTable.setProperty(ctx.getChild(0).getText(), value = ValueToReturn)
+                    return {
+                        'type':lhs['type'],
+                        'signed':True,
+                        'value': ValueToReturn
+                    }
         elif(ChildCount > 3):
             '''
-            对应语法：expression: Identifier '[' DecimalLiteral ']'
+            对应语法：expression: Identifier '[' expression ']'
             '''
             index = self.symbolTable.getProperty(ctx.getChild(0).getText())
-            subscribe = int(ctx.getChild(2).getText())
+            subscribe = self.visit(ctx.getChild(2))['value']
             if(isinstance(index.get_type(),ir.types.ArrayType)):
                 Builder = self.Builders[-1]
-                Address = Builder.gep(index.get_value(),[ir.Constant(int32,0),ir.Constant(int32,subscribe)],inbounds=True)
+                Address = Builder.gep(index.get_value(),[ir.Constant(int32,0),subscribe],inbounds=True)
                 ValueToReturn = Builder.load(Address)
                 print("call arrayItem",ValueToReturn)
                 return{
@@ -580,24 +657,22 @@ class myCpp20Visitor(cpp20Visitor):
                 '''
                 # result = self.visit(ctx.expression())
                 ChildCount=ctx.getChild(0).getChildCount()
-                if(ChildCount==1):
-                    #leftExpression为变量
-                    print(left," is an varible")
-                    if(left['level']==0): # 全局变量
-                        # 强制转换就先不管了
-                        Builder.store(right['value'],left['value'])
-                        return {
-                            'type':right['type'],   
-                            'value': Builder.load(left['value'])
-                        }
-                    else:
-                        left,right = self.assignTypeConvert(left,right) # 强制类型转换
-                        self.symbolTable.setProperty(left['name'], value = right['value'])
-                else:
-                    #leftExpression为数组
-                    print(left," is an arrayItem")
+                print(left," is an varible")
+                if('address' in left): # 全局变量或者数组
+                    # 强制转换就先不管了
                     Builder.store(right['value'],left['address'])
-                return 
+                    return {
+                        'type':right['type'],   
+                        'value': Builder.load(left['address'])
+                    }
+                else: # 局部变量
+                    left,right = self.assignTypeConvert(left,right) # 强制类型转换
+                    self.symbolTable.setProperty(ctx.getChild(0).getText(), value = right['value'])
+                    return {
+                        'type':right['type'],
+                        'value':right['value'],
+                        'signed': True
+                    }
 
             elif(Operation == '|' or Operation == 'bitor' or Operation == '&' or Operation == 'bitand' or Operation == '^' or Operation == 'xor'):
                 '''
@@ -684,10 +759,10 @@ class myCpp20Visitor(cpp20Visitor):
     def visitLeftExpression(self, ctx: cpp20Parser.LeftExpressionContext):
         if(ctx.getText()[-1]==']'):
             '''
-            对应语法：leftExpression:Identifier (LSQUARE DecimalLiteral RSQUARE)
+            对应语法：leftExpression:Identifier (LSQUARE expression RSQUARE)
             '''
             index = self.symbolTable.getProperty(ctx.getChild(0).getText())
-            subscribe = int(ctx.getChild(2).getText())
+            subscribe = self.visit(ctx.getChild(2))['value']
             if(isinstance(index.get_type(),ir.types.ArrayType)):
                 Builder = self.Builders[-1]
                 Address = Builder.gep(index.get_value(),[ir.Constant(int32,0),ir.Constant(int32,subscribe)],inbounds=True)
@@ -707,13 +782,18 @@ class myCpp20Visitor(cpp20Visitor):
             对应语法：leftExpression:Identifier
             '''
             symbol = self.symbolTable.getProperty(ctx.getText())
-            return {
-                    'name':ctx.getText(),
-                    'type':symbol.get_type(),
-                    'signed':symbol.get_signed(),
-                    'value':symbol.get_value(),
-                    'level':symbol.level
-                }
+            if(symbol.level == 0):
+                return {
+                        'type':symbol.get_type(),
+                        'signed':symbol.get_signed(),
+                        'address':symbol.get_value(),
+                    }
+            else:
+                return {
+                        'type':symbol.get_type(),
+                        'signed': True,
+                        'value':symbol.get_value(),
+                    }
     
     
     def visitWhileStatement(self, ctx: cpp20Parser.WhileStatementContext):

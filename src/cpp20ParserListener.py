@@ -1,4 +1,4 @@
-# Generated from grammar/cpp20Parser.g4 by ANTLR 4.9
+# Generated from grammar/cpp20Parser.g4 by ANTLR 4.9.3
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .cpp20Parser import cpp20Parser
@@ -341,12 +341,21 @@ class cpp20ParserListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by cpp20Parser#functionDeclaration.
-    def enterFunctionDeclaration(self, ctx:cpp20Parser.FunctionDeclarationContext):
+    # Enter a parse tree produced by cpp20Parser#functionDecl.
+    def enterFunctionDecl(self, ctx:cpp20Parser.FunctionDeclContext):
         pass
 
-    # Exit a parse tree produced by cpp20Parser#functionDeclaration.
-    def exitFunctionDeclaration(self, ctx:cpp20Parser.FunctionDeclarationContext):
+    # Exit a parse tree produced by cpp20Parser#functionDecl.
+    def exitFunctionDecl(self, ctx:cpp20Parser.FunctionDeclContext):
+        pass
+
+
+    # Enter a parse tree produced by cpp20Parser#functionDef.
+    def enterFunctionDef(self, ctx:cpp20Parser.FunctionDefContext):
+        pass
+
+    # Exit a parse tree produced by cpp20Parser#functionDef.
+    def exitFunctionDef(self, ctx:cpp20Parser.FunctionDefContext):
         pass
 
 

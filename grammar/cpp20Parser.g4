@@ -17,12 +17,11 @@ literals:
 
 floatingLiteral: FloatingLiteral;
 
-integerLiteral: DecimalLiteral IntegerSuffix?;
+integerLiteral: DecimalLiteral;
 
 characterLiteral: CharTypeSpecificaton? SQUOTE CChar SQUOTE;
 
-stringLiteral: CharTypeSpecificaton? DQUOTE SChar* DQUOTE;
-
+stringLiteral: DQUOTE SChar* DQUOTE;
 
 // translation
 
@@ -47,11 +46,10 @@ classDefinition: (CLASS | STRUCT) Identifier (COLON baseSpecifierList)? LBRACE m
 constExpression : literals;
 
 
-
-
 leftExpression :
     Identifier
-    | Identifier (LSQUARE DecimalLiteral RSQUARE) ;
+    | Identifier (LSQUARE expression RSQUARE) 
+    ;
 
 
 expression :
@@ -79,8 +77,10 @@ expression :
     | expression GEQ expression
     | expression EQ expression
     | expression NOT_EQ expression
-    | Identifier LSQUARE DecimalLiteral RSQUARE
-    | leftExpression ASSIGN expression;
+    | Identifier LSQUARE expression RSQUARE
+    | leftExpression ASSIGN expression
+    | leftExpression PLUS_PLUS
+    | leftExpression MINUS_MINUS;
 // statement 
 
 
@@ -127,15 +127,16 @@ continueStatement : CONTINUE SEMI;
 // Declaration
 
 
+
 declaration : 
     arrayDeclarator
     | variableDeclarator
-    | functionDeclaration    
+    | functionDeclaration
     | classDefinition;
 
 arrayDeclarator : 
-    typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN LBRACE expression (COMMA expression)* RBRACE)? #normalArrDecl
-    | charTypeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN stringLiteral)? #stringDecl
+    typeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN LBRACE expression (COMMA expression)* RBRACE)? SEMI #normalArrDecl
+    | charTypeSpecifier Identifier LSQUARE DecimalLiteral RSQUARE (ASSIGN stringLiteral)? SEMI #stringDecl
     ;
 
 // with global variable in line 2
@@ -148,7 +149,9 @@ variableDeclarator :
     typeSpecifier variableDeclaration (COMMA variableDeclaration)* SEMI;
 
 functionDeclaration : 
-    typeSpecifier Identifier LPAREN (functionParameter (COMMA functionParameter)*)? RPAREN block;
+    typeSpecifier Identifier LPAREN (functionParameter (COMMA functionParameter)*)? RPAREN SEMI #functionDecl
+    | typeSpecifier Identifier LPAREN (functionParameter (COMMA functionParameter)*)? RPAREN block #functionDef
+    ; 
 
 functionParameter :
     typeSpecifier Identifier
@@ -166,7 +169,7 @@ integerTypeSpecifier :
     INT
     | LONG
     | SHORT
-    | LONG  LONG;
+    | LONG LONG;
 
 realTypeSpecifier:
     FLOAT

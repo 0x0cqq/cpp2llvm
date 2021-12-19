@@ -29,7 +29,8 @@ void merge(int l, int r) {
 		index2++;
 		i++;
 	}
-	for (int k = l;k < r;k++) {
+	int k;
+	for (k = l;k < r;k++) {
 		array[k] = reg[k];
 	}
 }
@@ -46,6 +47,8 @@ void mergeSort(int l, int r) {
 	}
 }
 
+int print(int x);
+
 int main() {
 	array[0] = 5;
 	array[1] = 3;
@@ -59,7 +62,8 @@ int main() {
 	array[9] = 0;
 	N=10;
 	mergeSort(0, N);
-	for(int i=0;i<N;i++){
+	int i;
+	for(i=0;i<N;i++){
 		print(array[i]);
 	}
 	return 0;

@@ -1170,8 +1170,9 @@ class myCpp20Visitor(cpp20Visitor):
 
 if __name__ == "__main__":
     if(len(sys.argv) < 2):
-        filename = "test2.cpp"
-        outputfilename = None
+        print("too few arguments.")
+        print("usage: python3 main.py <inputfilename> <outputfilename>")
+        exit(1)
     else:
         filename = sys.argv[1]
         outputfilename = sys.argv[2] 
@@ -1192,4 +1193,4 @@ if __name__ == "__main__":
             f.write(str(visitor.Module))
     else:
         print(visitor.Module)
-    pass
+    exit(0)

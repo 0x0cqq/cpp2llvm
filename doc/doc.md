@@ -2,35 +2,73 @@
 
 小组成员：陈启乾、潘首安、谭弈凡
 
-
-
 ## 一、使用说明
 
 ### 1. 环境配置
 
-- 系统：Windows 10
+- 系统：Windows 10 & Ubuntu 20.04
 - 语言：Python 3.9
 - 安装 ANTLR4: [ANTLR4 Installation](https://github.com/antlr/antlr4/blob/master/doc/getting-started.md#installation)
-
-- 安装 ANTLR4 runtime library for python: `pip install antlr4-python3-runtime`
-
-
+- 安装 Python 依赖库: `pip install -r requirements.txt`
 
 ### 2. 编译与运行
 
 1. 编译: `make parser`[^1]
-2. 运行程序: `python3 main.py`
-3. 编译test文件夹下的代码：
-4. 运行llvm代码：
+2. 运行程序: `python main.py <inputfilename> <outputfilename>`
+3. 运行 LLVM IR：`lli [targetfile.ll]`（交互式解释器）或 `llc [targetfile.ll]` （编译成汇编，接下来用 clang 或 gcc 编译为机器码；目前编译器指定的架构 Triple 为 `x86_64-pc-linux`，可在代码中修改）
 
-[^1]: Maybe you need to install `make` in windows, and change this command to `mingw32-make parser`.
+[^1] 如果没有 make，也可以使用以下命令：`antlr4 -Dlanguage=Python3 grammar/cpp20Parser.g4 grammar/cpp20Lexer.g4 -visitor -o src`
 
+### 3. 测试
 
+在 `test` 文件夹下有许多测试样例，`test.py` 可以编译所有的这些样例，从而检测程序是否正确。 
 
 ## 二、文件结构
 
+```
+.
+├── Makefile
+├── README.md
+├── doc
+│   └── doc.md
+├── grammar
+│   ├── cpp20Lexer.g4
+│   └── cpp20Parser.g4
+├── main.py
+├── requirements.txt
+├── sample
+│   └── sample1.cpp
+├── src
+│   ├── cpp20Lexer.interp
+│   ├── cpp20Lexer.py
+│   ├── cpp20Lexer.tokens
+│   ├── cpp20Parser.interp
+│   ├── cpp20Parser.py
+│   ├── cpp20Parser.tokens
+│   ├── cpp20ParserListener.py
+│   └── cpp20ParserVisitor.py
+├── tables.py
+├── test
+│   ├── branch.cpp
+│   ├── empty.cpp
+│   ├── func.cpp
+│   ├── func_recursion.cpp
+│   ├── globalvar.cpp
+│   ├── loop.cpp
+│   ├── main.cpp
+│   ├── printf.cpp
+│   ├── str.cpp
+│   ├── va_args.cpp
+│   └── var.cpp
+└── test.py
+```
 
-
++ main.py 是程序的主要代码，table.py 是符号表代码
++ src 文件夹是 antlr 自动生成的编译器 python 代码
++ grammar 文件夹存储了语法文件
++ doc 文件夹存储了程序文档
++ test 文件夹存储了测试样例（test.py可以自动编译他们）
++ sample 文件夹存储了示例程序
 ## 三、实现语法及原理
 
 ### 1. 变量与数组
@@ -45,9 +83,9 @@
 
 #### 1.2 变量的初始化与访问
 
-变量的声明并不显式地表示在生成的llvm代码中，主要通过符号表实现。具体的实现方式为：判断当前作用域深度，选择以全局变量/临时变量的形式将变量的标识符及其属性加入到符号表。这里保存的变量值实际为其值所在的虚拟寄存器，并非其实际的地址，没有调用llvm的全局/临时变量分配接口，因此不显式地生成llvm代码。
+变量声明时候，会加入给其分配对应的栈空间（全局变量为静态空间），然后如果有初值，则初始化；没有则用零初始化，然后判断当前作用域深度，选择以全局变量/临时变量的形式将变量的标识符及其属性加入到符号表。这里保存的变量值（ `value` 字段）实际为其值所在地址。
 
-变量的访问通过调用符号表的`getProperty`接口实现，返回的是当前保存变量值的虚拟寄存器。当对变量进行赋值/更新后，再调用符号表的`setProperty`接口更新变量的值为新的虚拟寄存器即可。
+在访问和修改变量的值之前，都会通过符号表获取其存储的地址。变量的访问，会先构造一个 `load` 语句从地址读取，传给表达式求值等部分。修改变量的值，则会使用 `store` 语句把变量的值放置到对应地址。
 
 #### 1.3 数组的初始化与访问
 
@@ -72,7 +110,7 @@ IRBuilder.store(value, ptr, align=None)
 
 #### 2.1 运算表达式
 
-运算表达式支持的符号包括 '+'|'-'|'*'|'/'|'%'|'>>'|'<<'。实现的方式为：先递归地处理左、右子表达式，将他们转换为同一类型，记录为`exprType`,再调用`llvmlite`处理表达式的接口，保存值到LLVMValue。最终返回的结果为`{exprType,True,LLVMValue}`
+运算表达式支持的符号包括 `'+'|'-'|'*'|'/'|'%'|'>>'|'<<'` 。实现的方式为：先递归地处理左、右子表达式，将他们转换为同一类型，记录为`exprType`,再调用`llvmlite`处理表达式的接口，保存值到LLVMValue。最终返回的结果为`{exprType,True,LLVMValue}`
 
 ```python
 IRBuilder.add(lhs, rhs, name='', flags=())
@@ -86,7 +124,7 @@ IRBuilder.lshr(lhs, rhs, name='', flags=())
 
 #### 2.2 判断表达式
 
-判断表达式支持的符号包括'==' | '!=' | '<' | '<=' | '>' | '>='。实现的方式为：先递归地处理左、右子表达式，将之转换为同一类型，根据数据类型选择调用`llvmlite`的接口，保存值到LLVMValue。最终返回的结果为`{ir.IntType(1),True,LLVMValue}`
+判断表达式支持的符号包括 '==' | '!=' | '<' | '<=' | '>' | '>=' 。实现的方式为：先递归地处理左、右子表达式，将之转换为同一类型，根据数据类型选择调用`llvmlite`的接口，保存值到LLVMValue。最终返回的结果为`{ir.IntType(1),True,LLVMValue}` 。
 
 ```python
 IRBuilder.icmp_signed(cmpop, lhs, rhs, name='')
@@ -96,25 +134,59 @@ IRBuilder.fcmp_ordered(cmpop, lhs, rhs, name='', flags=[])
 
 #### 2.3 赋值表达式
 
-赋值表达式支持对数组和变量进行赋值，具体的方法与数组/变量初始化的方式一致，这里不再赘述。
+赋值表达式支持对数组和变量进行赋值，具体的方法与数组/变量初始化的方式一致。
+
+稍微具体来说，我们把所有能赋值的东西定义成为了 `leftExpression` ，与 `expression` 同样返回一个字典，但是不同的是，字典的 `value` 字段返回的是存储变量的地址。
+
+处理 `leftExpression '=' expression` 的时候，我们就会将右侧 `expression` 的值存入左侧 `leftExpression` 提供的地址中。
+
+赋值表达式也会返回一个值，就是 `leftExpression` 被赋予的值。
 
 ### 3. 函数
 
-#### 3.1 函数的声明
+#### 3.1 函数的声明和定义
+
+函数的声明在 `visitFunctionDecl` 函数中。
+
+```python
+LLVMFuncType = ir.FunctionType(ReturnType,ParameterTypeTuple,var_arg=is_var_arg)
+LLVMFunc = ir.Function(self.Module, LLVMFuncType, name=FunctionName)
+self.symbolTable.addGlobal(FunctionName,NameProperty(type = LLVMFuncType,value = LLVMFunc))
+```
+
+我们会先读取函数声明中的参数列表并构建函数实例，加入符号表。这里如果不给 ir.Function 增加任何的块就可以让函数成为声明。
+
+值得一提的是，LLVM 的 Function 模块支持可变参数（va_args），这给我们调用标准库（如 `printf`）产生了极大的方便。
+
+支持对函数的声明可以让我们有机会调用 C 标准库的函数，这可以以极小的成本扩展我们程序的功能。
+
+函数的定义在 `visitFunctionDef` 函数中。
+
+定义大部分与声明相同，只是在最后多新建一个 `Builder` 和 `Block` 并让函数体往这里面填写。
+
+```python
+Block = LLVMFunc.append_basic_block(name="__"+FunctionName)
+Builder = ir.IRBuilder(Block)
+self.Builders.append(Builder)
+# ...
+ValueToReturn=self.visit(ctx.block())
+```
 
 
+值得提到的是，C++ 可能出现一个函数没有 `return` 语句的情况，而 LLVM 却要求每一个 block 都必须有终结符，因此在函数结尾如果发现生成的 LLVM 没有终结符，我们需要补上一个：
+
+```python
+if(not self.Builders[-1].block.is_terminated):
+    self.Builders[-1].ret_void()
+```
 
 #### 3.2 函数的调用
 
+函数的调用语句的处理在 `visitFunctionCall` 中的 call 函数。
 
-
-#### 3.3 函数返回值
-
-
-
-#### 3.4 自定义函数
-
-
+```python
+ret_value = Builder.call(property.get_value(), paramList, name='', cconv=None, tail=False, fastmath=())
+```
 
 ### 4. 程序结构
 
@@ -133,15 +205,15 @@ IRBuilder.cbranch(cond, truebr, falsebr)
 
 程序支持的循环结构有while,dowhile,for。
 
-while和dowhile循环都分为三个块，分别保存判断表达式，循环部分和循环结束部分的语句。声明这三个块后，程序首先在当前`IRBuilder`输出指令跳转到判断表达式，然后输出判断表达式对应的语句，再调用`IRBuilder.cbranch`选择进入循环部分或循环结束部分，在循环部分结束后，判断当前块没被break/continue语句插入br语句时，调用`IRBuilder.branch`进入表达式判断语句块。
+while和dowhile循环都分为三个块，分别保存判断表达式，循环部分和循环结束部分的语句。声明这三个块后，程序首先在当前`IRBuilder`输出指令跳转到判断表达式，然后输出判断表达式对应的语句，再调用`IRBuilder.cbranch`选择进入循环部分或循环结束部分，在循环部分结束后，判断当前块没被break/continue语句插入br语句时，调用 `IRBuilder.branch` 进入表达式判断语句块。
 
-for循环结构为`for(forExprSet;expression;forExpr){ }`，括号内的三个部分都可以为空，目前不支持在`forExprSet`中进行变量的声明，但可以对已有的变量进行赋值。具体的实现中，for循环分为四个块，相比while和dowhile循环，在循环语句块后增加了更新语句块，逻辑基本一致。
+for 循环结构为 `for(forExprSet;expression;forExpr){ }` ，括号内的三个部分都可以为空，目前不支持在 `forExprSet` 中进行变量的声明，但可以对已有的变量进行赋值。具体的实现中，for循环分为四个块，相比 while 和 dowhile 循环，在循环语句块后增加了更新语句块，逻辑基本一致。
 
 #### 4.3 跳转结构
 
-程序支持的跳转结构有break和continue。程序在`visitor`中定义列表`blockToBreak`和`blockToContinue`，以栈的形式保存语句块。在进入一段循环结构时，将该循环结构中调用break和continue时跳转至的语句块加入对应列表中。识别到break和continue语句时，调用LLVM的接口，输出跳转语句。
+程序支持的跳转结构有break和continue。程序在`visitor`中定义列表`blockToBreak`和`blockToContinue`，以栈的形式保存语句块。在进入一段循环结构时，将该循环结构中调用 break 和 continue 时跳转至的语句块加入对应列表中。识别到 break 和 continue 语句时，调用 LLVM 的接口，输出跳转语句。
 
-break语句的功能为跳转到当前所在循环体的结束块。continue语句的功能为跳转到当前所在循环体的表达式判断块。特别地，对于for循环，continue语句会跳转到更新语句块，再继续进行表达式判断。
+break 语句的功能为跳转到当前所在循环体的结束块。 continue 语句的功能为跳转到当前所在循环体的表达式判断块。特别地，对于 for 循环，continue语句会跳转到更新语句块，再继续进行表达式判断。
 
 ## 四、难点与创新点
 
@@ -149,4 +221,6 @@ break语句的功能为跳转到当前所在循环体的结束块。continue语�
 2. 
 
 ## 五、小组分工
+
+陈启乾：语法文件编写，函数调用部分，变量部分
 

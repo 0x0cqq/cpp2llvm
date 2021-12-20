@@ -64,6 +64,12 @@ expression :
     | expression MOD expression 
     | expression ADD expression 
     | expression SUB expression 
+    | expression LT expression
+    | expression GT expression
+    | expression LEQ expression
+    | expression GEQ expression
+    | expression EQ expression
+    | expression NOT_EQ expression
     | expression BITOR expression
     | expression BITAND expression
     | expression XOR expression
@@ -71,12 +77,6 @@ expression :
     | expression AND expression
     | expression LSHIFT expression
     | expression RSHIFT expression
-    | expression LT expression
-    | expression GT expression
-    | expression LEQ expression
-    | expression GEQ expression
-    | expression EQ expression
-    | expression NOT_EQ expression
     | Identifier LSQUARE expression RSQUARE
     | leftExpression ASSIGN expression
     | leftExpression PLUS_PLUS

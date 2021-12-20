@@ -1,4 +1,7 @@
 .antlr/
+.vscode/
+.vs/
 __pycache__
 *.ir
+*.ll
 *.log

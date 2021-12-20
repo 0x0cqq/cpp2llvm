@@ -1,14 +1,26 @@
-int main(){
-    while(1){
-        int b = 1;
+int printf(char* s, ...);
+
+int s[10];
+
+int main() {
+	int a = 1;
+	for(a = 1;a < 10;a++) {
+		s[a] = a;
+	}
+	for(a = 1;a < 10;a++) {
+		printf("%d\n",s[a]);
+	}
+    int b = 1;
+	for(a = 1;a < 10;a++) {
+        for(b = 1;b < 10;b++) {
+		    printf("Hello, world! %d %d\n", a, b);
+	    }
+	}
+    b = 1;
+    while(b < 20){
         b = b + 1;
+        printf("b: %d ", b);
     }
-    int a = 1;
-    while(a){
-        a = a + 1;
-    }
-    int b = 2;
-    for(a = 1, b = 2; a <= 10; a = a + 1){
-        b = b + 1;
-    }
+    printf("\n");
+	return 0;
 }

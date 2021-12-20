@@ -2,7 +2,10 @@ import copy
 
 # 一个符号的所有属性
 # 构成：
-# type, ... 
+# type: 存 LLVM 的类型
+# value: 存在程序中的地址
+# signed: 是否是有符号的
+# level: 存在层次（在存的时候给加上的）
 class NameProperty: 
     def __init__(self, type, value, level = 0,signed=True):
         self.type = type

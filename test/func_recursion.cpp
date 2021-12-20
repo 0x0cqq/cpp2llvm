@@ -1,12 +1,14 @@
-int array[10];
-int reg[10];
+int array[20];
+int reg[20];
 int N;
 
+int printf(char* s, ...);
+
+
 void merge(int l, int r) {
+	printf("merge %d %d\n", l, r);
 	int mid = (l + r) / 2;
-	int i = l;
-	int index1 = l;
-	int index2 = mid;
+	int i = l, index1 = l, index2 = mid;
 	while (index1 < mid && index2 < r) {
 		if (array[index1] < array[index2]) {
 			reg[i] = array[index1];
@@ -30,7 +32,7 @@ void merge(int l, int r) {
 		i++;
 	}
 	int k;
-	for (k = l;k < r;k++) {
+	for (k = l; k < r; k++) {
 		array[k] = reg[k];
 	}
 	return;
@@ -45,11 +47,10 @@ void mergeSort(int l, int r) {
 		mergeSort(l, mid);
 		mergeSort(mid, r);
 		merge(l, r);
+		return;
 	}
-	return;
 }
 
-int printf(char* s, ...);
 
 int main() {
 	array[0] = 5;
@@ -65,8 +66,8 @@ int main() {
 	N=10;
 	mergeSort(0, N);
 	int i;
-	for(i=0;i<N;i++){
-		printf("%d", array[i]);
+	for(i = 0;i < N;i++){
+		printf("%d ", array[i]);
 	}
 	return 0;
 }

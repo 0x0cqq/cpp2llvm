@@ -131,56 +131,56 @@ def serializedATN():
         buf.write("\u00e6\f\26\2\2\u00e6\u00e7\7\33\2\2\u00e7\u0116\5\"\22")
         buf.write("\27\u00e8\u00e9\f\25\2\2\u00e9\u00ea\7\23\2\2\u00ea\u0116")
         buf.write("\5\"\22\26\u00eb\u00ec\f\24\2\2\u00ec\u00ed\7\25\2\2\u00ed")
-        buf.write("\u0116\5\"\22\25\u00ee\u00ef\f\23\2\2\u00ef\u00f0\7/\2")
-        buf.write("\2\u00f0\u0116\5\"\22\24\u00f1\u00f2\f\22\2\2\u00f2\u00f3")
-        buf.write("\7.\2\2\u00f3\u0116\5\"\22\23\u00f4\u00f5\f\21\2\2\u00f5")
-        buf.write("\u00f6\7}\2\2\u00f6\u0116\5\"\22\22\u00f7\u00f8\f\20\2")
-        buf.write("\2\u00f8\u00f9\7[\2\2\u00f9\u0116\5\"\22\21\u00fa\u00fb")
-        buf.write("\f\17\2\2\u00fb\u00fc\7*\2\2\u00fc\u0116\5\"\22\20\u00fd")
-        buf.write("\u00fe\f\16\2\2\u00fe\u00ff\7\35\2\2\u00ff\u0116\5\"\22")
-        buf.write("\17\u0100\u0101\f\r\2\2\u0101\u0102\7\37\2\2\u0102\u0116")
-        buf.write("\5\"\22\16\u0103\u0104\f\f\2\2\u0104\u0105\7\3\2\2\u0105")
-        buf.write("\u0116\5\"\22\r\u0106\u0107\f\13\2\2\u0107\u0108\7\4\2")
-        buf.write("\2\u0108\u0116\5\"\22\f\u0109\u010a\f\n\2\2\u010a\u010b")
-        buf.write("\7$\2\2\u010b\u0116\5\"\22\13\u010c\u010d\f\t\2\2\u010d")
-        buf.write("\u010e\7%\2\2\u010e\u0116\5\"\22\n\u010f\u0110\f\b\2\2")
-        buf.write("\u0110\u0111\7!\2\2\u0111\u0116\5\"\22\t\u0112\u0113\f")
-        buf.write("\7\2\2\u0113\u0114\7X\2\2\u0114\u0116\5\"\22\b\u0115\u00df")
-        buf.write("\3\2\2\2\u0115\u00e2\3\2\2\2\u0115\u00e5\3\2\2\2\u0115")
-        buf.write("\u00e8\3\2\2\2\u0115\u00eb\3\2\2\2\u0115\u00ee\3\2\2\2")
-        buf.write("\u0115\u00f1\3\2\2\2\u0115\u00f4\3\2\2\2\u0115\u00f7\3")
-        buf.write("\2\2\2\u0115\u00fa\3\2\2\2\u0115\u00fd\3\2\2\2\u0115\u0100")
-        buf.write("\3\2\2\2\u0115\u0103\3\2\2\2\u0115\u0106\3\2\2\2\u0115")
-        buf.write("\u0109\3\2\2\2\u0115\u010c\3\2\2\2\u0115\u010f\3\2\2\2")
-        buf.write("\u0115\u0112\3\2\2\2\u0116\u0119\3\2\2\2\u0117\u0115\3")
-        buf.write("\2\2\2\u0117\u0118\3\2\2\2\u0118#\3\2\2\2\u0119\u0117")
-        buf.write("\3\2\2\2\u011a\u012a\5*\26\2\u011b\u012a\5.\30\2\u011c")
-        buf.write("\u012a\5\60\31\2\u011d\u012a\5\62\32\2\u011e\u012a\5\64")
-        buf.write("\33\2\u011f\u012a\58\35\2\u0120\u012a\5:\36\2\u0121\u012a")
-        buf.write("\5<\37\2\u0122\u012a\5&\24\2\u0123\u012a\5D#\2\u0124\u012a")
-        buf.write("\5@!\2\u0125\u0127\5\"\22\2\u0126\u0125\3\2\2\2\u0126")
-        buf.write("\u0127\3\2\2\2\u0127\u0128\3\2\2\2\u0128\u012a\7\17\2")
-        buf.write("\2\u0129\u011a\3\2\2\2\u0129\u011b\3\2\2\2\u0129\u011c")
-        buf.write("\3\2\2\2\u0129\u011d\3\2\2\2\u0129\u011e\3\2\2\2\u0129")
-        buf.write("\u011f\3\2\2\2\u0129\u0120\3\2\2\2\u0129\u0121\3\2\2\2")
-        buf.write("\u0129\u0122\3\2\2\2\u0129\u0123\3\2\2\2\u0129\u0124\3")
-        buf.write("\2\2\2\u0129\u0126\3\2\2\2\u012a%\3\2\2\2\u012b\u012f")
-        buf.write("\7\7\2\2\u012c\u012e\5$\23\2\u012d\u012c\3\2\2\2\u012e")
-        buf.write("\u0131\3\2\2\2\u012f\u012d\3\2\2\2\u012f\u0130\3\2\2\2")
-        buf.write("\u0130\u0132\3\2\2\2\u0131\u012f\3\2\2\2\u0132\u0133\7")
-        buf.write("\b\2\2\u0133\'\3\2\2\2\u0134\u0135\7\u0083\2\2\u0135\u013e")
-        buf.write("\7\13\2\2\u0136\u013b\5\"\22\2\u0137\u0138\7\16\2\2\u0138")
-        buf.write("\u013a\5\"\22\2\u0139\u0137\3\2\2\2\u013a\u013d\3\2\2")
-        buf.write("\2\u013b\u0139\3\2\2\2\u013b\u013c\3\2\2\2\u013c\u013f")
-        buf.write("\3\2\2\2\u013d\u013b\3\2\2\2\u013e\u0136\3\2\2\2\u013e")
-        buf.write("\u013f\3\2\2\2\u013f\u0140\3\2\2\2\u0140\u0141\7\f\2\2")
-        buf.write("\u0141)\3\2\2\2\u0142\u0143\7P\2\2\u0143\u0144\7\13\2")
-        buf.write("\2\u0144\u0145\5\"\22\2\u0145\u0146\7\f\2\2\u0146\u0149")
-        buf.write("\5$\23\2\u0147\u0148\7F\2\2\u0148\u014a\5$\23\2\u0149")
-        buf.write("\u0147\3\2\2\2\u0149\u014a\3\2\2\2\u014a+\3\2\2\2\u014b")
-        buf.write("\u014c\7\62\2\2\u014c\u014d\5\36\20\2\u014d\u014e\7\21")
-        buf.write("\2\2\u014e\u014f\5$\23\2\u014f-\3\2\2\2\u0150\u0151\7")
-        buf.write("k\2\2\u0151\u0152\7\13\2\2\u0152\u0153\5\"\22\2\u0153")
+        buf.write("\u0116\5\"\22\25\u00ee\u00ef\f\23\2\2\u00ef\u00f0\7\3")
+        buf.write("\2\2\u00f0\u0116\5\"\22\24\u00f1\u00f2\f\22\2\2\u00f2")
+        buf.write("\u00f3\7\4\2\2\u00f3\u0116\5\"\22\23\u00f4\u00f5\f\21")
+        buf.write("\2\2\u00f5\u00f6\7$\2\2\u00f6\u0116\5\"\22\22\u00f7\u00f8")
+        buf.write("\f\20\2\2\u00f8\u00f9\7%\2\2\u00f9\u0116\5\"\22\21\u00fa")
+        buf.write("\u00fb\f\17\2\2\u00fb\u00fc\7!\2\2\u00fc\u0116\5\"\22")
+        buf.write("\20\u00fd\u00fe\f\16\2\2\u00fe\u00ff\7X\2\2\u00ff\u0116")
+        buf.write("\5\"\22\17\u0100\u0101\f\r\2\2\u0101\u0102\7/\2\2\u0102")
+        buf.write("\u0116\5\"\22\16\u0103\u0104\f\f\2\2\u0104\u0105\7.\2")
+        buf.write("\2\u0105\u0116\5\"\22\r\u0106\u0107\f\13\2\2\u0107\u0108")
+        buf.write("\7}\2\2\u0108\u0116\5\"\22\f\u0109\u010a\f\n\2\2\u010a")
+        buf.write("\u010b\7[\2\2\u010b\u0116\5\"\22\13\u010c\u010d\f\t\2")
+        buf.write("\2\u010d\u010e\7*\2\2\u010e\u0116\5\"\22\n\u010f\u0110")
+        buf.write("\f\b\2\2\u0110\u0111\7\35\2\2\u0111\u0116\5\"\22\t\u0112")
+        buf.write("\u0113\f\7\2\2\u0113\u0114\7\37\2\2\u0114\u0116\5\"\22")
+        buf.write("\b\u0115\u00df\3\2\2\2\u0115\u00e2\3\2\2\2\u0115\u00e5")
+        buf.write("\3\2\2\2\u0115\u00e8\3\2\2\2\u0115\u00eb\3\2\2\2\u0115")
+        buf.write("\u00ee\3\2\2\2\u0115\u00f1\3\2\2\2\u0115\u00f4\3\2\2\2")
+        buf.write("\u0115\u00f7\3\2\2\2\u0115\u00fa\3\2\2\2\u0115\u00fd\3")
+        buf.write("\2\2\2\u0115\u0100\3\2\2\2\u0115\u0103\3\2\2\2\u0115\u0106")
+        buf.write("\3\2\2\2\u0115\u0109\3\2\2\2\u0115\u010c\3\2\2\2\u0115")
+        buf.write("\u010f\3\2\2\2\u0115\u0112\3\2\2\2\u0116\u0119\3\2\2\2")
+        buf.write("\u0117\u0115\3\2\2\2\u0117\u0118\3\2\2\2\u0118#\3\2\2")
+        buf.write("\2\u0119\u0117\3\2\2\2\u011a\u012a\5*\26\2\u011b\u012a")
+        buf.write("\5.\30\2\u011c\u012a\5\60\31\2\u011d\u012a\5\62\32\2\u011e")
+        buf.write("\u012a\5\64\33\2\u011f\u012a\58\35\2\u0120\u012a\5:\36")
+        buf.write("\2\u0121\u012a\5<\37\2\u0122\u012a\5&\24\2\u0123\u012a")
+        buf.write("\5D#\2\u0124\u012a\5@!\2\u0125\u0127\5\"\22\2\u0126\u0125")
+        buf.write("\3\2\2\2\u0126\u0127\3\2\2\2\u0127\u0128\3\2\2\2\u0128")
+        buf.write("\u012a\7\17\2\2\u0129\u011a\3\2\2\2\u0129\u011b\3\2\2")
+        buf.write("\2\u0129\u011c\3\2\2\2\u0129\u011d\3\2\2\2\u0129\u011e")
+        buf.write("\3\2\2\2\u0129\u011f\3\2\2\2\u0129\u0120\3\2\2\2\u0129")
+        buf.write("\u0121\3\2\2\2\u0129\u0122\3\2\2\2\u0129\u0123\3\2\2\2")
+        buf.write("\u0129\u0124\3\2\2\2\u0129\u0126\3\2\2\2\u012a%\3\2\2")
+        buf.write("\2\u012b\u012f\7\7\2\2\u012c\u012e\5$\23\2\u012d\u012c")
+        buf.write("\3\2\2\2\u012e\u0131\3\2\2\2\u012f\u012d\3\2\2\2\u012f")
+        buf.write("\u0130\3\2\2\2\u0130\u0132\3\2\2\2\u0131\u012f\3\2\2\2")
+        buf.write("\u0132\u0133\7\b\2\2\u0133\'\3\2\2\2\u0134\u0135\7\u0083")
+        buf.write("\2\2\u0135\u013e\7\13\2\2\u0136\u013b\5\"\22\2\u0137\u0138")
+        buf.write("\7\16\2\2\u0138\u013a\5\"\22\2\u0139\u0137\3\2\2\2\u013a")
+        buf.write("\u013d\3\2\2\2\u013b\u0139\3\2\2\2\u013b\u013c\3\2\2\2")
+        buf.write("\u013c\u013f\3\2\2\2\u013d\u013b\3\2\2\2\u013e\u0136\3")
+        buf.write("\2\2\2\u013e\u013f\3\2\2\2\u013f\u0140\3\2\2\2\u0140\u0141")
+        buf.write("\7\f\2\2\u0141)\3\2\2\2\u0142\u0143\7P\2\2\u0143\u0144")
+        buf.write("\7\13\2\2\u0144\u0145\5\"\22\2\u0145\u0146\7\f\2\2\u0146")
+        buf.write("\u0149\5$\23\2\u0147\u0148\7F\2\2\u0148\u014a\5$\23\2")
+        buf.write("\u0149\u0147\3\2\2\2\u0149\u014a\3\2\2\2\u014a+\3\2\2")
+        buf.write("\2\u014b\u014c\7\62\2\2\u014c\u014d\5\36\20\2\u014d\u014e")
+        buf.write("\7\21\2\2\u014e\u014f\5$\23\2\u014f-\3\2\2\2\u0150\u0151")
+        buf.write("\7k\2\2\u0151\u0152\7\13\2\2\u0152\u0153\5\"\22\2\u0153")
         buf.write("\u0154\7\f\2\2\u0154\u0158\7\7\2\2\u0155\u0157\5,\27\2")
         buf.write("\u0156\u0155\3\2\2\2\u0157\u015a\3\2\2\2\u0158\u0156\3")
         buf.write("\2\2\2\u0158\u0159\3\2\2\2\u0159\u015b\3\2\2\2\u015a\u0158")
@@ -1750,6 +1750,24 @@ class cpp20Parser ( Parser ):
         def ADD(self):
             return self.getToken(cpp20Parser.ADD, 0)
 
+        def LT(self):
+            return self.getToken(cpp20Parser.LT, 0)
+
+        def GT(self):
+            return self.getToken(cpp20Parser.GT, 0)
+
+        def LEQ(self):
+            return self.getToken(cpp20Parser.LEQ, 0)
+
+        def GEQ(self):
+            return self.getToken(cpp20Parser.GEQ, 0)
+
+        def EQ(self):
+            return self.getToken(cpp20Parser.EQ, 0)
+
+        def NOT_EQ(self):
+            return self.getToken(cpp20Parser.NOT_EQ, 0)
+
         def BITOR(self):
             return self.getToken(cpp20Parser.BITOR, 0)
 
@@ -1770,24 +1788,6 @@ class cpp20Parser ( Parser ):
 
         def RSHIFT(self):
             return self.getToken(cpp20Parser.RSHIFT, 0)
-
-        def LT(self):
-            return self.getToken(cpp20Parser.LT, 0)
-
-        def GT(self):
-            return self.getToken(cpp20Parser.GT, 0)
-
-        def LEQ(self):
-            return self.getToken(cpp20Parser.LEQ, 0)
-
-        def GEQ(self):
-            return self.getToken(cpp20Parser.GEQ, 0)
-
-        def EQ(self):
-            return self.getToken(cpp20Parser.EQ, 0)
-
-        def NOT_EQ(self):
-            return self.getToken(cpp20Parser.NOT_EQ, 0)
 
         def getRuleIndex(self):
             return cpp20Parser.RULE_expression
@@ -1978,7 +1978,7 @@ class cpp20Parser ( Parser ):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 17)")
                         self.state = 237
-                        self.match(cpp20Parser.BITOR)
+                        self.match(cpp20Parser.LT)
                         self.state = 238
                         self.expression(18)
                         pass
@@ -1991,7 +1991,7 @@ class cpp20Parser ( Parser ):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 16)")
                         self.state = 240
-                        self.match(cpp20Parser.BITAND)
+                        self.match(cpp20Parser.GT)
                         self.state = 241
                         self.expression(17)
                         pass
@@ -2004,7 +2004,7 @@ class cpp20Parser ( Parser ):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 15)")
                         self.state = 243
-                        self.match(cpp20Parser.XOR)
+                        self.match(cpp20Parser.LEQ)
                         self.state = 244
                         self.expression(16)
                         pass
@@ -2017,7 +2017,7 @@ class cpp20Parser ( Parser ):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 14)")
                         self.state = 246
-                        self.match(cpp20Parser.OR)
+                        self.match(cpp20Parser.GEQ)
                         self.state = 247
                         self.expression(15)
                         pass
@@ -2030,7 +2030,7 @@ class cpp20Parser ( Parser ):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 13)")
                         self.state = 249
-                        self.match(cpp20Parser.AND)
+                        self.match(cpp20Parser.EQ)
                         self.state = 250
                         self.expression(14)
                         pass
@@ -2043,7 +2043,7 @@ class cpp20Parser ( Parser ):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 12)")
                         self.state = 252
-                        self.match(cpp20Parser.LSHIFT)
+                        self.match(cpp20Parser.NOT_EQ)
                         self.state = 253
                         self.expression(13)
                         pass
@@ -2056,7 +2056,7 @@ class cpp20Parser ( Parser ):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 11)")
                         self.state = 255
-                        self.match(cpp20Parser.RSHIFT)
+                        self.match(cpp20Parser.BITOR)
                         self.state = 256
                         self.expression(12)
                         pass
@@ -2069,7 +2069,7 @@ class cpp20Parser ( Parser ):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 10)")
                         self.state = 258
-                        self.match(cpp20Parser.LT)
+                        self.match(cpp20Parser.BITAND)
                         self.state = 259
                         self.expression(11)
                         pass
@@ -2082,7 +2082,7 @@ class cpp20Parser ( Parser ):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 9)")
                         self.state = 261
-                        self.match(cpp20Parser.GT)
+                        self.match(cpp20Parser.XOR)
                         self.state = 262
                         self.expression(10)
                         pass
@@ -2095,7 +2095,7 @@ class cpp20Parser ( Parser ):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 8)")
                         self.state = 264
-                        self.match(cpp20Parser.LEQ)
+                        self.match(cpp20Parser.OR)
                         self.state = 265
                         self.expression(9)
                         pass
@@ -2108,7 +2108,7 @@ class cpp20Parser ( Parser ):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 7)")
                         self.state = 267
-                        self.match(cpp20Parser.GEQ)
+                        self.match(cpp20Parser.AND)
                         self.state = 268
                         self.expression(8)
                         pass
@@ -2121,7 +2121,7 @@ class cpp20Parser ( Parser ):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 6)")
                         self.state = 270
-                        self.match(cpp20Parser.EQ)
+                        self.match(cpp20Parser.LSHIFT)
                         self.state = 271
                         self.expression(7)
                         pass
@@ -2134,7 +2134,7 @@ class cpp20Parser ( Parser ):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 5)")
                         self.state = 273
-                        self.match(cpp20Parser.NOT_EQ)
+                        self.match(cpp20Parser.RSHIFT)
                         self.state = 274
                         self.expression(6)
                         pass

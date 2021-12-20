@@ -7,7 +7,7 @@ if __name__ == "__main__":
         match_files = [f for f in files if re.search(r'.*\.cpp$', f)]
         for f in match_files:
             path = os.path.join(root, f)
-            path_ir = re.sub(r"\.cpp", ".ir", path)
+            path_ir = re.sub(r"\.cpp", ".ll", path)
             print("testing: " + path)
             # print("python main.py " + path + " > " + path_ir)
             

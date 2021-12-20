@@ -70,16 +70,22 @@ class myCpp20Visitor(cpp20Visitor):
         if(self.symbolTable.current_scope_level == 0):
             newvar = GlobalVariable(self.Module,self.type,ctx.Identifier().getText())
             newvar.linkage = 'internal'
-            newvar.initializer = self.visit(ctx.constExpression())['value']
+            newvar.initializer = ir.Constant(self.type,self.visit(ctx.constExpression())['value'])
             self.symbolTable.addGlobal(ctx.Identifier().getText(),
                 NameProperty(
                     type  = self.type,
                     value = newvar)) # 只需要记录虚拟寄存器即可   
         else:
+            #局部变量
+            Builder = self.Builders[-1]
+            # 分配空间
+            newVar = Builder.alloca(self.type, name = ctx.Identifier().getText())
+            # 存上初值
+            Builder.store(self.visit(ctx.constExpression())['value'], newVar)
+            # 存入符号表
             self.symbolTable.addLocal(ctx.Identifier().getText(),
-                NameProperty(
-                    type= self.type,
-                    value=self.visit(ctx.constExpression())['value'])) # 只需要记录虚拟寄存器即可  
+                NameProperty(type = self.type, value = newVar))     
+        
         return 
     
     def visitVarDeclWithInit(self, ctx: cpp20Parser.VarDeclWithInitContext):
@@ -92,10 +98,14 @@ class myCpp20Visitor(cpp20Visitor):
             raise BaseException("global var must be initialized with a const expression")
         else:
             #局部变量
+            Builder = self.Builders[-1]
+            # 分配空间
+            newVar = Builder.alloca(self.type, name = ctx.Identifier().getText())
+            # 存上初值
+            Builder.store(self.visit(ctx.expression())['value'], newVar)
+            # 存入符号表
             self.symbolTable.addLocal(ctx.Identifier().getText(),
-                NameProperty(
-                    type= self.type,
-                    value=self.visit(ctx.expression())['value'])) # 只需要记录虚拟寄存器即可        
+                NameProperty(type = self.type, value = newVar))     
         
 
         return
@@ -106,6 +116,7 @@ class myCpp20Visitor(cpp20Visitor):
         '''
         # print(f"varDeclWithOutInit: {ctx.Identifier().getText()}")
         if(self.symbolTable.current_scope_level == 0):
+            # 全局变量
             newvar = GlobalVariable(self.Module,self.type,ctx.Identifier().getText())
             newvar.linkage='internal'
             newvar.initializer=ir.Constant(self.type,None)
@@ -114,10 +125,17 @@ class myCpp20Visitor(cpp20Visitor):
                     type=self.type,
                     value=newvar))
         else:
+            # 局部变量
+            Builder = self.Builders[-1]
+            # 分配空间
+            newVar = Builder.alloca(self.type, name = ctx.Identifier().getText())
+            # 存上初值
+            Builder.store(ir.Constant(self.type,None), newVar)
+            # 存到符号表里面
             self.symbolTable.addLocal(ctx.Identifier().getText(),
                 NameProperty(
                     type=self.type,
-                    value=None)) # 这里可能还是得给一个初始的值，但是也未必
+                    value=newVar))
         return
 
     def visitVariableDeclarator(self, ctx: cpp20Parser.VariableDeclaratorContext):
@@ -192,7 +210,7 @@ class myCpp20Visitor(cpp20Visitor):
         ChildCount=ctx.getChildCount()
         if(self.symbolTable.current_scope_level == 0):
             if ctx.stringLiteral() is not None:
-                NewVar=self.visit(ctx.stringLiteral())['address']
+                NewVar=self.visit(ctx.stringLiteral())['value']
             else:
                 NewVar=ir.GlobalVariable(self.Module,LLVMArrayType,name = ArrayName)
                 NewVar.linkage='internal'
@@ -213,21 +231,6 @@ class myCpp20Visitor(cpp20Visitor):
         
         symbolProperty = NameProperty(LLVMArrayType,NewVar)
         self.symbolTable.addLocal(ArrayName,symbolProperty)
-        ChildCount=ctx.getChildCount()
-        if ChildCount>5:
-            stringLiteral = ctx.getChild(6)
-            ScharNum = stringLiteral.getChildCount()
-            elementIndex = 1
-            while(elementIndex < ScharNum-1):
-                charNum = stringLiteral.getChild(elementIndex)
-                print(charNum)
-                if(charNum=='\n'):
-                    CharToStore = ir.Constant(ArrayType,charNum)
-                else:
-                    CharToStore = ir.Constant(ArrayType,charNum)
-                address = Builder.gep(NewVar,[ir.Constant(int32,0),ir.Constant(int32,elementIndex)])
-                Builder.store(CharToStore,address)
-                elementIndex += 1
         return
 
     def visitReturnStatement(self, ctx: cpp20Parser.ReturnStatementContext):
@@ -269,10 +272,7 @@ class myCpp20Visitor(cpp20Visitor):
             paramList = []
             for expression in ctx.expression():
                 expression_value = self.visit(expression) 
-                if('address' in expression_value):
-                    paramList.append(self.visit(expression)['address'])
-                else:
-                    paramList.append(self.visit(expression)['value'])
+                paramList.append(expression_value['value'])
             # 检查合法性
             # print("paramList & argsList: ", paramList,property.get_type().args)
             if(property.get_type().var_arg):
@@ -351,17 +351,20 @@ class myCpp20Visitor(cpp20Visitor):
         self.symbolTable.addGlobal(FunctionName,NameProperty(type = LLVMFuncType,value = LLVMFunc))
         #储存函数为block
         Block = LLVMFunc.append_basic_block(name="__"+FunctionName)
-        Builder= ir.IRBuilder(Block)
+        Builder = ir.IRBuilder(Block)
         self.Builders.append(Builder)
         #进入作用域
         self.symbolTable.enterScope()
         #将函数形参存入符号表
         for param, argsValue in zip(ParameterList,LLVMFunc.args):
-            self.symbolTable.addLocal(param['name'], NameProperty(param['type'], argsValue))
+            address = Builder.alloca(argsValue.type, name=param['name'])
+            Builder.store(argsValue, address)
+            self.symbolTable.addLocal(param['name'], NameProperty(param['type'], address))
         #访问函数块，返回值到ValueToReturn
         ValueToReturn=self.visit(ctx.block())
         #可能还要强制加上一个ret void，不然不知道会不会有bug。。。
-        # if(self.Builders[-1].)
+        if(not self.Builders[-1].block.is_terminated):
+            self.Builders[-1].ret_void()
         # self.Builders[-1].ret_void()
         #退出作用域
         self.symbolTable.exitScope()
@@ -386,7 +389,6 @@ class myCpp20Visitor(cpp20Visitor):
         '''
         对应语法: typeSpecifier : integerTypeSpecifier | realTypeSpecifier | booleanTypeSpecifier | charTypeSpecifier | voidTypeSpecifier;
         '''
-        #TODO: 定义visitRealTypeSpecifier即后面类型的函数
         Type = self.visit(ctx.getChild(0))
         return Type
     
@@ -412,7 +414,7 @@ class myCpp20Visitor(cpp20Visitor):
             return int64
 
     def isExprJudge(self,realText):
-        #没有处理 NOT_EQ中"not_equ"的情况
+        #没有处理 NOT_EQ 中"not_equ"的情况
         if (realText == ">"):
             return True
         elif(realText == "<"):
@@ -560,12 +562,9 @@ class myCpp20Visitor(cpp20Visitor):
                 对应语法: expression: Identifier
                 '''
                 symbol = self.symbolTable.getProperty(ctx.getText())
-                if(symbol.level == 0):
-                    ret_value = Builder.load(symbol.get_value())
-                else:
-                    ret_value = symbol.get_value()
+                # 读地址再 load 进来
+                ret_value = Builder.load(symbol.get_value())
                 return {
-                    'name':ctx.getText(),
                     'type':ret_value.type,
                     'signed':symbol.get_signed(),
                     'value':ret_value
@@ -603,30 +602,20 @@ class myCpp20Visitor(cpp20Visitor):
                 # 减减或者加加
                 Builder = self.Builders[-1]
                 lhs = self.visit(ctx.getChild(0))
-                # 先 load
-                if('address' in lhs):
-                    lhs['value'] = Builder.load(lhs['address'])
+                # 先 load, address 就是地址
+                now_value = Builder.load(lhs['address'])
                 # 再 + 1 / -1
                 if(ctx.getChild(1).getText() == '++'):
-                    ValueToReturn = Builder.add(lhs['value'],ir.Constant(lhs['type'],1))
+                    ValueToReturn = Builder.add(now_value,ir.Constant(lhs['type'],1))
                 else:
-                    ValueToReturn = Builder.sub(lhs['value'],ir.Constant(lhs['type'],1))
+                    ValueToReturn = Builder.sub(now_value,ir.Constant(lhs['type'],1))
                 # 存储
-                if('address' in lhs): # 数组，反正是地址
-                    Builder.store(ValueToReturn, lhs['address'])
-                    return {
-                        'type':lhs['type'],
-                        'signed':True,
-                        'address':lhs['address'],
-                        'value': ValueToReturn
-                    }    
-                else: # 变量
-                    self.symbolTable.setProperty(ctx.getChild(0).getText(), value = ValueToReturn)
-                    return {
-                        'type':lhs['type'],
-                        'signed':True,
-                        'value': ValueToReturn
-                    }
+                Builder.store(ValueToReturn, lhs['address'])
+                return {
+                    'type':lhs['type'],
+                    'signed':True,
+                    'value': ValueToReturn
+                }    
         elif(ChildCount > 3):
             '''
             对应语法: expression: Identifier '[' expression ']'
@@ -642,7 +631,6 @@ class myCpp20Visitor(cpp20Visitor):
                     'type':index.get_type().element,
                     'signed':True,
                     'value':ValueToReturn
-                    # 'address':Address
                 }
             else:
                 raise BaseException("the array isn't defined")
@@ -715,7 +703,7 @@ class myCpp20Visitor(cpp20Visitor):
                 return{
                     'type':right['type'],
                     'signed':True,
-                        'value':valueToReturn
+                    'value':valueToReturn
                 }
 
             elif(Operation == '='):
@@ -725,21 +713,14 @@ class myCpp20Visitor(cpp20Visitor):
                 # result = self.visit(ctx.expression())
                 ChildCount=ctx.getChild(0).getChildCount()
                 print(left," is an varible")
-                if('address' in left): # 全局变量或者数组
-                    # 强制转换就先不管了
-                    Builder.store(right['value'],left['address'])
-                    return {
-                        'type':right['type'],   
-                        'value': Builder.load(left['address'])
-                    }
-                else: # 局部变量
-                    left,right = self.assignTypeConvert(left,right) # 强制类型转换
-                    self.symbolTable.setProperty(ctx.getChild(0).getText(), value = right['value'])
-                    return {
-                        'type':right['type'],
-                        'value':right['value'],
-                        'signed': True
-                    }
+                # left,right = self.assignTypeConvert(left,right) # 强制类型转换
+
+                # 强制转换就先不管了
+                Builder.store(right['value'],left['address'])
+                return {
+                    'type':right['type'],   
+                    'value': Builder.load(left['address'])
+                }
 
             elif(Operation == '|' or Operation == 'bitor' or Operation == '&' or Operation == 'bitand' or Operation == '^' or Operation == 'xor'):
                 '''
@@ -828,7 +809,7 @@ class myCpp20Visitor(cpp20Visitor):
         # 可以在这里就开一个全局变量orz
         # 反正字符串肯定得塞到全局变量里面orz
         
-        s = ast.literal_eval(ctx.getText())
+        s = ast.literal_eval(ctx.getText()) + '\0'
         
         string_type = ArrayType(int8,len(s))
         string_address = ir.GlobalVariable(self.Module,string_type,'__string_'+str(self.string_count))
@@ -842,7 +823,7 @@ class myCpp20Visitor(cpp20Visitor):
             string_address = Builder.gep(string_address, [ir.Constant(int32,0),ir.Constant(int32,0)], inbounds=True)
         return {
             'type' : string_type,
-            'address' : string_address
+            'value' : string_address
         }        
 
     
@@ -862,7 +843,6 @@ class myCpp20Visitor(cpp20Visitor):
                 return{
                     'type':index.get_type().element,
                     'signed':True,
-                    'value':ValueToReturn,
                     'address':Address
                 }
             else:
@@ -873,18 +853,11 @@ class myCpp20Visitor(cpp20Visitor):
             对应语法: leftExpression:Identifier
             '''
             symbol = self.symbolTable.getProperty(ctx.getText())
-            if(symbol.level == 0):
-                return {
-                        'type':symbol.get_type(),
-                        'signed':symbol.get_signed(),
-                        'address':symbol.get_value(),
-                    }
-            else:
-                return {
-                        'type':symbol.get_type(),
-                        'signed': True,
-                        'value':symbol.get_value(),
-                    }
+            return {
+                    'type':symbol.get_type(),
+                    'signed':symbol.get_signed(),
+                    'address':symbol.get_value(),
+                }
     
     
     def visitWhileStatement(self, ctx: cpp20Parser.WhileStatementContext):

@@ -284,6 +284,9 @@ IntegerSuffix: UnsignedSuffix? (LongLongSuffix | LongSuffix );
 
 StringLiteral:
 	DQUOTE SChar* DQUOTE;
+	
+CharacterLiteral:
+	CharTypeSpecificaton? SQUOTE CChar SQUOTE;
 
 // General Literals
 fragment UnsignedSuffix: 'u' | 'U';

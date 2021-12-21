@@ -1,7 +1,7 @@
 from antlr4 import *
 from llvmlite.ir.types import ArrayType
 from llvmlite.ir.values import GlobalVariable, ReturnValue
-import sys
+import sys,os
 import ast
 
 from src.cpp20Lexer import cpp20Lexer
@@ -518,6 +518,7 @@ class myCpp20Visitor(cpp20Visitor):
     def assignTypeConvert(self,left,right):
         # 赋值语句中用的类型转换
         # 强制把右侧的类型转换为左侧的类型
+        # 右侧的读进来，
         if(left['type'] != right['type']):
             if(self.isInt(left) and self.isInt(right)):
                 right = self.intConvert(right,left)
@@ -527,7 +528,7 @@ class myCpp20Visitor(cpp20Visitor):
                 right = self.intToDouble(right)
             else:
                 pass
-        return left,right
+        return right
     
     def exprTypeConvert(self,left,right):
         #left和right的符号类型不一致时，类型转换为一致，向大的类型转换
@@ -713,9 +714,8 @@ class myCpp20Visitor(cpp20Visitor):
                 # result = self.visit(ctx.expression())
                 ChildCount=ctx.getChild(0).getChildCount()
                 print(left," is an varible")
-                # left,right = self.assignTypeConvert(left,right) # 强制类型转换
 
-                # 强制转换就先不管了
+                right = self.assignTypeConvert(left,right) # 强制类型转换
                 Builder.store(right['value'],left['address'])
                 return {
                     'type':right['type'],   
@@ -802,6 +802,12 @@ class myCpp20Visitor(cpp20Visitor):
         return{
             'type':double,
             'value':ir.Constant(double,float(ctx.getText()))
+        }
+    
+    def visitCharacterLiteral(self, ctx: cpp20Parser.CharacterLiteralContext):
+        return {
+            'type':int8,
+            'value':ir.Constant(int8,ord(ctx.getText()[1]))
         }
     
     def visitStringLiteral(self, ctx: cpp20Parser.StringLiteralContext):
@@ -1169,9 +1175,9 @@ class myCpp20Visitor(cpp20Visitor):
         return
 
 if __name__ == "__main__":
-    if(len(sys.argv) < 2):
-        print("too few arguments.")
-        print("usage: python3 main.py <inputfilename> <outputfilename>")
+    if(len(sys.argv) < 3):
+        print("too few arguments.",flush=True)
+        print("usage: python3 main.py <inputfilename> <outputfilename>",flush=True)
         exit(1)
     else:
         filename = sys.argv[1]

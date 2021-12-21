@@ -19,7 +19,7 @@ floatingLiteral: FloatingLiteral;
 
 integerLiteral: DecimalLiteral;
 
-characterLiteral: CharTypeSpecificaton? SQUOTE CChar SQUOTE;
+characterLiteral: CharacterLiteral;
 
 stringLiteral: StringLiteral;
 

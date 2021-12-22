@@ -562,21 +562,28 @@ class myCpp20Visitor(cpp20Visitor):
                 '''
                 对应语法: expression: Identifier
                 '''
+                
                 symbol = self.symbolTable.getProperty(ctx.getText())
                 # 读地址再 load 进来
-                ret_value = Builder.load(symbol.get_value())
-                return {
-                    'type':ret_value.type,
-                    'signed':symbol.get_signed(),
-                    'value':ret_value
-                }
+                if( isinstance(symbol.get_type(),ir.ArrayType)):
+                    return {
+                        'type': symbol.get_type().element.as_pointer(),
+                        'value': Builder.gep(symbol.get_value(),[ir.Constant(int32,0),ir.Constant(int32,0)],inbounds=True)
+                    }
+                else:
+                    ret_value = Builder.load(symbol.get_value())
+                    return {
+                        'type':ret_value.type,
+                        'signed':symbol.get_signed(),
+                        'value':ret_value
+                    }
 
         elif(ChildCount == 2):
             '''
             对应语法: expression: NOT expression | SUB expression
             对应语法: leftexpression MINUS_MINUS | leftexpression PLUS_PLUS
             '''  
-            if(ctx.getChild(0).getText() == '-' or ctx.getChild(0).getText() == '!'):
+            if(ctx.getChild(0).getText() == '-' or ctx.getChild(0).getText() == '!' or ctx.getChild(0).getText() == '&'):
                 Builder = self.Builders[-1]
                 result = self.visit(ctx.getChild(1))
                 if(ctx.getChild(0).getText() == '!'):
@@ -598,6 +605,12 @@ class myCpp20Visitor(cpp20Visitor):
                         'type':result['type'],
                         'signed':True,
                         'value':ValueToReturn
+                    }
+                elif(ctx.getChild(0).getText() == '&'):
+                    return {
+                        'type': result['type'].as_pointer(),
+                        'signed' : True,
+                        'value' : result['address']
                     }
             else:
                 # 减减或者加加

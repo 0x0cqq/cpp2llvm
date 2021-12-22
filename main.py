@@ -1027,7 +1027,7 @@ class myCpp20Visitor(cpp20Visitor):
         '''
         ifStatement : IF LPAREN expression RPAREN statement (ELSE statement)?;
         '''
-        print(f"visitIfStatement:{ctx.getText()}, {ctx.getChildCount()}")
+        #print(f"visitIfStatement:{ctx.getText()}, {ctx.getChildCount()}")
         self.symbolTable.enterScope()
         Builder = self.Builders[-1]
         trueblock = Builder.append_basic_block()
@@ -1091,7 +1091,7 @@ class myCpp20Visitor(cpp20Visitor):
         '''
         switchStatement : SWITCH LPAREN expression RPAREN LBRACE (caseStatement)* RBRACE;
         '''
-        print(f"visitSwitchStatement:{ctx.getText()}, {ctx.getChildCount()}")
+        #print(f"visitSwitchStatement:{ctx.getText()}, {ctx.getChildCount()}")
         self.symbolTable.enterScope()
         casenum = ctx.getChildCount()-6
         Builder = self.Builders[-1]
@@ -1104,7 +1104,6 @@ class myCpp20Visitor(cpp20Visitor):
             temarray.append(Builder.append_basic_block())
         self.Switchcaselabel.append(temarray)
         self.blockToBreak.append(temarray[-1])
-        print("len(break)",len(self.blockToBreak))
         EndSwitch = temarray[-1]
         
         Builder.branch(temarray[0])
@@ -1128,8 +1127,7 @@ class myCpp20Visitor(cpp20Visitor):
         '''
         caseStatement : CASE constExpression COLON statement;
         '''
-        print(f"visitCaseStatement:{ctx.getText()}, {ctx.getChildCount()}")
-        print("len(break)",len(self.blockToBreak))
+        #print(f"visitCaseStatement:{ctx.getText()}, {ctx.getChildCount()}")
         self.symbolTable.enterScope()
         judgeblock = self.Switchcaselabel[-1][0]
         statementblock = self.Switchcaselabel[-1][1]
@@ -1155,9 +1153,7 @@ class myCpp20Visitor(cpp20Visitor):
         
         self.Builders.pop()
         self.Builders.append(ir.IRBuilder(statementblock))
-        print("len(break):first",len(self.blockToBreak))
         self.visit(ctx.getChild(3))
-        print("len(break):end",len(self.blockToBreak))
         if(not self.Builders[-1].block.is_terminated):
             self.Builders[-1].branch(targetstatementblock)
         
@@ -1171,8 +1167,7 @@ class myCpp20Visitor(cpp20Visitor):
         
 
     def visitBreakStatement(self, ctx: cpp20Parser.BreakStatementContext):
-        print(f"visitBreakStatement:{ctx.getText()}, {ctx.getChildCount()}")
-        print("len(break)",len(self.blockToBreak))
+        #print(f"visitBreakStatement:{ctx.getText()}, {ctx.getChildCount()}")
         if self.blockToBreak:
             Builder = self.Builders[-1]
             Builder.branch(self.blockToBreak[-1])

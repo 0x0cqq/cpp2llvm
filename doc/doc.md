@@ -1,4 +1,4 @@
-# 编译原理大作业：C到LLVM的编译器
+# 编译原理大作业：C 到 LLVM 的编译器
 
 小组成员：陈启乾、潘首安、谭弈凡
 
@@ -10,40 +10,65 @@
 - 语言：Python 3.9
 - 安装 ANTLR4: [ANTLR4 Installation](https://github.com/antlr/antlr4/blob/master/doc/getting-started.md#installation)
 - 安装 Python 依赖库: `pip install -r requirements.txt`
+- （在 Ubuntu 上面）安装 LLVM ：`sudo apt install clang-format clang-tidy clang-tools clang clangd libc++-dev libc++1 libc++abi-dev libc++abi1 libclang-dev libclang1 liblldb-11-dev libllvm-ocaml-dev libomp-dev libomp5 lld lldb llvm-dev llvm-runtime llvm python-clang`
 
 ### 2. 编译与运行
 
-1. 编译: `make parser`[^1]
+1. 由 ANTLR 生成代码文件: `make parser`[^1][^2]
 2. 运行程序: `python main.py <inputfilename> <outputfilename>`
 3. 运行 LLVM IR：`lli [targetfile.ll]`（交互式解释器）或 `llc [targetfile.ll]` （编译成汇编，接下来用 clang 或 gcc 编译为机器码；目前编译器指定的架构 Triple 为 `x86_64-pc-linux`，可在代码中修改）
 
-[^1] 如果没有 make，也可以使用以下命令：`antlr4 -Dlanguage=Python3 grammar/cpp20Parser.g4 grammar/cpp20Lexer.g4 -visitor -o src`
+[^1]: 如果没有 make，也可以使用以下命令：`antlr4 -Dlanguage=Python3 grammar/cpp20Parser.g4 grammar/cpp20Lexer.g4 -visitor -o src`
+[^2]: 或者其实 `src` 文件夹里面有已经生成好的程序，理论上可以直接运行。
 
 ### 3. 测试
 
-在 `test` 文件夹下有许多测试样例，`test.py` 可以编译所有的这些样例，从而检测程序是否正确。 
+在 `test` 文件夹下有许多测试样例，`test.py` 可以编译所有的这些样例，从而检测程序是否正确。
+
+### 4. 支持的语法简略
+
++ 变量
+    + 局部变量、全局变量；可以初始化也可以不初始化
+    + 类型：包括 `int`, `long long`, `double`, `bool` 等变量类型
+    + 支持了数组和字符串（包括常量字符串）
++ 表达式：
+    + 支持了绝大多数的算数预算、逻辑运算
+    + 支持数组按下标读取(`a[i]`) ，和对左值取地址 `&a[j]` 
+
++ 语句
+    + 分支：`if-else`, `switch`
+    + 循环：`while` , `do while` , `for` (包括 `continue` 和 `break`)
+
++ 函数
+    + 定义：支持不同类型参数、返回值；支持递归
+    + 声明：支持可变参数、指针参数，可以通过声明的方式引入外部函数（如 `scanf` 和 `printf`）
+
+
+### 4. 完成样例情况
+
+实现了样例1（回文检测），样例2（归并排序），样例3（KMP算法）
 
 ## 二、文件结构
 
 ```
 .
-├── Makefile
+├── Makefile 
 ├── README.md
-├── doc
+├── doc 【文档】
 │   └── doc.md
-├── grammar
-│   ├── cpp20Lexer.g4
-│   └── cpp20Parser.g4
-├── main.py
-├── requirements.txt
-├── sample
-│   ├── sample1_palindrome.cpp
-│   ├── sample1_palindrome.ll
-│   ├── sample2_mergesort.cpp
-│   ├── sample2_mergesort.ll
-│   ├── sample3_KMP.cpp
-│   └── sample3_KMP.ll
-├── src
+├── grammar 【语法文件】
+│   ├── cpp20Lexer.g4 			【词法文件】
+│   └── cpp20Parser.g4 			【句法文件】
+├── main.py 					【主程序】
+├── requirements.txt 			【python 依赖包】
+├── sample 【样例程序】
+│   ├── sample1_palindrome.cpp	【回文数程序】
+│   ├── sample1_palindrome.ll	【编译出的 LLVM IR】
+│   ├── sample2_mergesort.cpp	【归并排序】
+│   ├── sample2_mergesort.ll	【编译出的 LLVM IR】
+│   ├── sample3_KMP.cpp			【KMP程序】
+│   └── sample3_KMP.ll			【编译出的 LLVM IR】
+├── src	【ANTLR 自动生成的部分】
 │   ├── cpp20Lexer.interp
 │   ├── cpp20Lexer.py
 │   ├── cpp20Lexer.tokens
@@ -52,8 +77,8 @@
 │   ├── cpp20Parser.tokens
 │   ├── cpp20ParserListener.py
 │   └── cpp20ParserVisitor.py
-├── tables.py
-├── test
+├── tables.py					【符号表】
+├── test【一些简单的测试程序】
 │   ├── address.cpp
 │   ├── branch.cpp
 │   ├── empty.cpp
@@ -66,7 +91,7 @@
 │   ├── str.cpp
 │   ├── va_args.cpp
 │   └── var.cpp
-└── test.py
+└── test.py						【自动化测试】
 ```
 
 + main.py 是程序的主要代码，table.py 是符号表代码
@@ -205,38 +230,40 @@ IRBuilder.cbranch(cond, truebr, falsebr)
 
 #### 4.1 选择结构
 
-程序支持的选择结构有if和switch。
+程序支持的选择结构有 if 和 switch 。
 
-注意switch语句的case里若语句大于一条需要加一个大括号把语句框起来。
+注意 switch 语句的 case 里若语句大于一条需要加一个大括号把语句框起来。
 
-if语句会视有没有else的情况而分类讨论，有else则分成三个块，其中分别是if对应的语句块，else对应的语句块和最终的结尾块。程序会先判断if的表达式，之后调用`IRBuilder.cbranch`根据表达式结果选择进入if语句块还是else语句块。无论是if语句块还是else语句块都会在结尾跳转到结尾块，结尾块存入数组。若没有else则分为两个块，if语句块和结尾块，`IRBuilder.cbranch`根据表达式结果选择进入if语句块还是结尾块，if语句块结束后也会进入结尾块。
+if 语句会视有没有 else 的情况而分类讨论，有 else 则分成三个块，其中分别是 if 对应的语句块，else 对应的语句块和最终的结尾块。程序会先判断 if 的表达式，之后调用 `IRBuilder.cbranch` 根据表达式结果选择进入 if 语句块还是 else 语句块。无论是 if 语句块还是else语句块都会在结尾跳转到结尾块，结尾块存入数组。若没有 else 则分为两个块， if 语句块和结尾块，`IRBuilder.cbranch` 根据表达式结果选择进入if语句块还是结尾块，if 语句块结束后也会进入结尾块。
 
-switch语句会生成两个语句块链——判断链和语句链。判断链为许多判断是否跳转到语句链的语句，语句链则为case下面的语句。程序会调用函数判断表达式是否命中case，仍然用`IRBuilder.cbranch`，若命中则跳转到语句链，然后顺着语句链依次执行，若没有命中则跳到下一个判断块继续判断。如果全部没有命中则直接跳到结尾块，语句链结束之后也是跳到结尾块。如果有break就直接在case的语句块末尾转而跳转到switch语句结束。
+switch 语句会生成两个语句块链——判断链和语句链。判断链为许多判断是否跳转到语句链的语句，语句链则为 case 下面的语句。程序会调用函数判断表达式是否命中 case ，仍然用 `IRBuilder.cbranch` ，若命中则跳转到语句链，然后顺着语句链依次执行，若没有命中则跳到下一个判断块继续判断。如果全部没有命中则直接跳到结尾块，语句链结束之后也是跳到结尾块。如果有 break 就直接在 case 的语句块末尾转而跳转到 switch 语句结束。
 
 #### 4.2 循环结构
 
-程序支持的循环结构有while,dowhile,for。
+程序支持的循环结构有 while , dowhile, for。
 
-while和dowhile循环都分为三个块，分别保存判断表达式，循环部分和循环结束部分的语句。声明这三个块后，程序首先在当前`IRBuilder`输出指令跳转到判断表达式，然后输出判断表达式对应的语句，再调用`IRBuilder.cbranch`选择进入循环部分或循环结束部分，在循环部分结束后，判断当前块没被break/continue语句插入br语句时，调用 `IRBuilder.branch` 进入表达式判断语句块。
+while 和 dowhile 循环都分为三个块，分别保存判断表达式，循环部分和循环结束部分的语句。声明这三个块后，程序首先在当前 `IRBuilder` 输出指令跳转到判断表达式，然后输出判断表达式对应的语句，再调用 `IRBuilder.cbranch` 选择进入循环部分或循环结束部分，在循环部分结束后，判断当前块没被 `break/continue` 语句插入br语句时，调用 `IRBuilder.branch` 进入表达式判断语句块。
 
 for 循环结构为 `for(forExprSet;expression;forExpr){ }` ，括号内的三个部分都可以为空，目前不支持在 `forExprSet` 中进行变量的声明，但可以对已有的变量进行赋值。具体的实现中，for循环分为四个块，相比 while 和 dowhile 循环，在循环语句块后增加了更新语句块，逻辑基本一致。
 
 #### 4.3 跳转结构
 
-程序支持的跳转结构有break和continue。程序在`visitor`中定义列表`blockToBreak`和`blockToContinue`，以栈的形式保存语句块。在进入一段循环结构时，将该循环结构中调用 break 和 continue 时跳转至的语句块加入对应列表中。识别到 break 和 continue 语句时，调用 LLVM 的接口，输出跳转语句。
+程序支持的跳转结构有 break 和 continue 。程序在`visitor`中定义列表`blockToBreak`和`blockToContinue`，以栈的形式保存语句块。在进入一段循环结构时，将该循环结构中调用 break 和 continue 时跳转至的语句块加入对应列表中。识别到 break 和 continue 语句时，调用 LLVM 的接口，输出跳转语句。
 
-break 语句的功能为跳转到当前所在循环体的结束块。 continue 语句的功能为跳转到当前所在循环体的表达式判断块。特别地，对于 for 循环，continue语句会跳转到更新语句块，再继续进行表达式判断。
+break 语句的功能为跳转到当前所在循环体的结束块。 continue 语句的功能为跳转到当前所在循环体的表达式判断块。特别地，对于 for 循环，continue 语句会跳转到更新语句块，再继续进行表达式判断。
 
 ## 四、难点与创新点
 
-1. 对一些需要嵌套的语法（表达式，循环结构）进行中间代码生成时，需要递归地进行处理。这个过程需要对返回值进行类型定义，重组等操作，确定输出跳转的语句块，逻辑相对复杂。
-2. 
+1. 对一些需要嵌套的语法（表达式，循环结构）进行中间代码生成时，需要递归地进行处理。这个过程需要对返回值进行类型定义，重组等操作，确定输出跳转的语句块，逻辑相对复杂
+2. 声明了 scanf 和 printf 函数，用较小的代价实现了输入输出。
+3. 程序的跳转部分实现较为复杂，需要多方面照顾
+3. 在实现新语法的时候，很容易改的让原来支持的语法出现错误；为此我们保存了我们写好一个语法之后留下的测试文件，并且编写了自动化测试脚本，这样可以比较容易地（靠谱地）进行增量开发
 
 ## 五、小组分工
 
-陈启乾：语法文件编写，函数调用部分，变量部分，符号表部分
+陈启乾：语法文件编写，函数调用部分，变量 &  符号表部分
 
 潘首安：表达式部分，数组部分，循环和跳转结构
 
-谭弈凡：选择结构，样例程序编写
+谭弈凡：选择结构编写，样例程序编写
 

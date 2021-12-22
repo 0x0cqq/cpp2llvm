@@ -1,6 +1,8 @@
 int printf(char* a, ...);
-char S[100]="babacdacabcabbdeabacdaaa";
-char T[100]="abacd";
+int scanf(char* a, ...);
+
+char S[100];
+char T[100];
 int next[100];
 int len;
 void GetNext()
@@ -42,7 +44,7 @@ void KMP()
 			if(T[j] == 0)
 			{
 				pos = i - len;
-				printf("%d\n",pos);
+				printf("place: %d\n",pos);
 				flag = 1;
 			}
 		}
@@ -53,6 +55,11 @@ void KMP()
 }
 int main()
 {
+	printf("enter S:");
+	scanf("%s",S);
+	printf("enter T:");
+	scanf("%s",T);
+
 	GetNext();
 	KMP();
 	return 0;

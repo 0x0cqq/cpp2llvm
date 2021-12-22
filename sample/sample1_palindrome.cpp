@@ -1,8 +1,15 @@
 int printf(char* a, ...);
-int main()
+int scanf(char* a, ...);
+
+
+
+char str[100];
+
+
+int check()
 {
-	char str[10] = "aba";
-	str[3] = '\0';
+	printf("please enter your string:\n");
+	scanf("%s", str);
 	int flag = 1;
 	int front = 0;
 	int back = 0;
@@ -19,6 +26,11 @@ int main()
 	if(flag)
 		printf("true\n");
 	else
-		printf("flase\n");
+		printf("false\n");
+	return 0;
+}
+
+int main(){
+	check();
 	return 0;
 }

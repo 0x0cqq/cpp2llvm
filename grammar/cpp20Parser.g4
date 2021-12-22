@@ -59,6 +59,7 @@ expression :
     | LPAREN expression RPAREN
     | NOT expression
     | SUB expression
+    | BITAND leftExpression
     | expression MULT expression 
     | expression DIV expression 
     | expression MOD expression 

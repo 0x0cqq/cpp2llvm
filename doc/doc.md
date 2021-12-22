@@ -37,7 +37,12 @@
 ├── main.py
 ├── requirements.txt
 ├── sample
-│   └── sample1.cpp
+│   ├── sample1_palindrome.cpp
+│   ├── sample1_palindrome.ll
+│   ├── sample2_mergesort.cpp
+│   ├── sample2_mergesort.ll
+│   ├── sample3_KMP.cpp
+│   └── sample3_KMP.ll
 ├── src
 │   ├── cpp20Lexer.interp
 │   ├── cpp20Lexer.py
@@ -49,6 +54,7 @@
 │   └── cpp20ParserVisitor.py
 ├── tables.py
 ├── test
+│   ├── address.cpp
 │   ├── branch.cpp
 │   ├── empty.cpp
 │   ├── func.cpp

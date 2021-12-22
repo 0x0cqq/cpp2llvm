@@ -1142,8 +1142,9 @@ class myCpp20Visitor(cpp20Visitor):
         
         self.Builders.pop()
         self.Builders.append(ir.IRBuilder(statementblock))
-        print("len(break)",len(self.blockToBreak))
+        print("len(break):first",len(self.blockToBreak))
         self.visit(ctx.getChild(3))
+        print("len(break):end",len(self.blockToBreak))
         if(not self.Builders[-1].block.is_terminated):
             self.Builders[-1].branch(targetstatementblock)
         
